@@ -119,6 +119,45 @@ export interface TicTacToeGameState extends WinnableGameState {
   x?: PlayerID;
   o?: PlayerID;
 }
+/**
+ * Type for a piece in Shogi
+ */
+export type ShogiPiece = 'P' | 'L' | 'N' | 'S' | 'G' | 'B' | 'R' | 'K' | 'p' | 'l' | 'n' | 's' | 'g' | 'b' | 'r' | 'k';
+
+/**
+ * Type for a position on a Shogi board
+ */
+export interface ShogiPosition {
+  row: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+  col: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+}
+
+/**
+ * Type for a move in Shogi
+ */
+export interface ShogiMove {
+  from: ShogiPosition;
+  to: ShogiPosition;
+  piece: ShogiPiece;
+  promotion?: boolean;
+}
+
+/**
+ * Type for the state of a shogi game
+ * The state of the game is represented as a list of moves, and the playerIDs of the players (black and white)
+ * The first player to join the game is black, the second is white
+ */
+export interface ShogiGameState extends WinnableGameState {
+  sfen: string;
+  black?: PlayerID;
+  white?: PlayerID;
+  firstPlayer: ShogiColor;
+}
+
+/**
+ * Type for a color in Shogi
+ */
+export type ShogiColor = 'black' | 'white';
 
 /**
  * Type for the state of a ConnectFour game.
