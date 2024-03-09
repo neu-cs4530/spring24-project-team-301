@@ -1,5 +1,12 @@
+import InvalidParametersError, {
+  BOARD_POSITION_NOT_VALID_MESSAGE,
+  GAME_FULL_MESSAGE,
+  GAME_NOT_STARTABLE_MESSAGE,
+  PLAYER_ALREADY_IN_GAME_MESSAGE,
+  PLAYER_NOT_IN_GAME_MESSAGE,
+} from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
-import { GameMove, ShogiGameState, ShogiMove } from '../../types/CoveyTownSocket';
+import { GameMove, ShogiColor, ShogiGameState, ShogiMove } from '../../types/CoveyTownSocket';
 import Game from './Game';
 
 /**
@@ -10,9 +17,46 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
   public constructor() {
     super({
       sfen: 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL',
+      inhand: '',
       firstPlayer: 'black',
       status: 'WAITING_TO_START',
     });
+  }
+
+  /**
+   * Indicates that a player is ready to start the game.
+   *
+   * Updates the game state to indicate that the player is ready to start the game.
+   *
+   * If both players are ready, the game will start.
+   *
+   * The first player (red or yellow) is determined as follows:
+   *   - If neither player was in the last game in this area (or there was no prior game), the first player is red.
+   *   - If at least one player was in the last game in this area, then the first player will be the other color from last game.
+   *   - If a player from the last game *left* the game and then joined this one, they will be treated as a new player (not given the same color by preference).   *
+   *
+   * @throws InvalidParametersError if the player is not in the game (PLAYER_NOT_IN_GAME_MESSAGE)
+   * @throws InvalidParametersError if the game is not in the WAITING_TO_START state (GAME_NOT_STARTABLE_MESSAGE)
+   *
+   * @param player The player who is ready to start the game
+   */
+  public startGame(player: Player): void {
+    if (this.state.status !== 'WAITING_TO_START') {
+      throw new InvalidParametersError(GAME_NOT_STARTABLE_MESSAGE);
+    }
+    if (this.state.black !== player.id && this.state.white !== player.id) {
+      throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
+    }
+    if (this.state.black === player.id) {
+      this.state.blackReady = true;
+    }
+    if (this.state.white === player.id) {
+      this.state.whiteReady = true;
+    }
+    this.state = {
+      ...this.state,
+      status: this.state.blackReady && this.state.whiteReady ? 'IN_PROGRESS' : 'WAITING_TO_START',
+    };
   }
 
   /**
@@ -29,8 +73,14 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
       for (let j = 0; j < rank.length; j++) {
         const char = rank[j];
         if (Number.isNaN(parseInt(char, 10))) {
-          board[i][file] = char;
-          file++;
+          if (char === '+') {
+            board[i][file] = char + rank[j + 1];
+            j++;
+            file++;
+          } else {
+            board[i][file] = char;
+            file++;
+          }
         } else {
           file += parseInt(char, 10);
         }
@@ -76,6 +126,50 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     } = move;
     const board = this._board;
     const piece = board[from.row][from.col];
+    if (this.validateMoveOnBoard(move.move, board)) {
+      const simulatedBoard = this._simulateMove(board, from, to, piece);
+      const isCheck = this._isCheck(simulatedBoard, piece);
+
+      // If the player is in check after the move, the move is invalid
+      if (isCheck) {
+        return false;
+      }
+
+      return true;
+    }
+    return false;
+  }
+
+  private _simulateMove(
+    board: string[][],
+    from: { row: number; col: number },
+    to: { row: number; col: number },
+    piece: string,
+  ): string[][] {
+    // Create a copy of the board to simulate the move
+    const simulatedBoard = [...board];
+    // Simulate the move
+    simulatedBoard[from.row][from.col] = ' ';
+    simulatedBoard[to.row][to.col] = piece;
+    return simulatedBoard;
+  }
+
+  protected validateMoveOnBoard(move: ShogiMove, board: string[][]): boolean {
+    const { from, to, promotion } = move;
+    const piece = board[from.row][from.col];
+
+    if (promotion) {
+      if (
+        piece === 'K' ||
+        piece === 'k' ||
+        piece === 'G' ||
+        piece === 'g' ||
+        (piece.toUpperCase() !== piece && to.row < 7) ||
+        (piece.toLowerCase() === piece && to.row > 2)
+      ) {
+        return false;
+      }
+    }
     if (piece === ' ') {
       return false;
     }
@@ -292,6 +386,39 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     return true;
   }
 
+  private _isCheck(board: string[][], piece: string): boolean {
+    // Determine the position of the king
+    let kingRow = -1;
+    let kingCol = -1;
+    for (let i = 0; i < board.length; i++) {
+      for (let j = 0; j < board[i].length; j++) {
+        if (board[i][j] === piece.toUpperCase()) {
+          kingRow = i;
+          kingCol = j;
+          break;
+        }
+      }
+    }
+
+    // Check if any opponent piece threatens the king
+    for (let i = 0; i < board.length; i++) {
+      for (let j = 0; j < board[i].length; j++) {
+        const opponentPiece = board[i][j];
+        if (
+          opponentPiece.toLowerCase() === opponentPiece &&
+          this.validateMoveOnBoard(
+            { from: { row: i, col: j }, to: { row: kingRow, col: kingCol } } as ShogiMove,
+            board,
+          )
+        ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   /**
    * Applies a move to the game state
    * @param move The move to apply to the game state
@@ -300,20 +427,85 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     const {
       move: { from, to },
     } = move;
-    const board = this._board;
-    const piece = board[from.row][from.col];
-    board[from.row][from.col] = ' ';
-    board[to.row][to.col] = piece;
-    this.state = {
-      ...this.state,
-      sfen: this._boardToSfen(board),
-      status: 'IN_PROGRESS',
-    };
+    if (this.validateMove(move)) {
+      const board = this._board;
+      const piece = board[from.row][from.col];
+      board[from.row][from.col] = ' ';
+      board[to.row][to.col] = piece;
+      this.state = {
+        ...this.state,
+        sfen: this._boardToSfen(board),
+        status: 'IN_PROGRESS',
+      };
+    } else {
+      throw new InvalidParametersError(BOARD_POSITION_NOT_VALID_MESSAGE);
+    }
   }
 
-  protected _join(player: Player): void {}
+  protected _join(player: Player): void {
+    if (this.state.black === player.id || this.state.white === player.id) {
+      throw new InvalidParametersError(PLAYER_ALREADY_IN_GAME_MESSAGE);
+    }
+    if (!this.state.black) {
+      this.state = {
+        ...this.state,
+        status: 'WAITING_FOR_PLAYERS',
+        black: player.id,
+      };
+    } else if (!this.state.white) {
+      this.state = {
+        ...this.state,
+        status: 'WAITING_FOR_PLAYERS',
+        white: player.id,
+      };
+    } else {
+      throw new InvalidParametersError(GAME_FULL_MESSAGE);
+    }
+    if (this.state.black && this.state.white) {
+      this.state.status = 'WAITING_TO_START';
+    }
+  }
 
   protected _leave(player: Player): void {
-    throw new Error('Method not implemented.');
+    if (this.state.status === 'OVER') {
+      return;
+    }
+    const removePlayer = (playerID: string): ShogiColor => {
+      if (this.state.black === playerID) {
+        this.state = {
+          ...this.state,
+          black: undefined,
+          blackReady: false,
+        };
+        return 'black';
+      }
+      if (this.state.white === playerID) {
+        this.state = {
+          ...this.state,
+          white: undefined,
+          whiteReady: false,
+        };
+        return 'white';
+      }
+      throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
+    };
+    const color = removePlayer(player.id);
+    switch (this.state.status) {
+      case 'WAITING_TO_START':
+      case 'WAITING_FOR_PLAYERS':
+        // no-ops: nothing needs to happen here
+        this.state.status = 'WAITING_FOR_PLAYERS';
+        break;
+      case 'IN_PROGRESS':
+        this.state = {
+          ...this.state,
+          status: 'OVER',
+          winner: color === 'black' ? this.state.white : this.state.black,
+        };
+        break;
+      default:
+        // This behavior can be undefined :)
+        throw new Error(`Unexpected game status: ${this.state.status}`);
+    }
   }
 }

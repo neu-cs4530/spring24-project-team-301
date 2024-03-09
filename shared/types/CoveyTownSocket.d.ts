@@ -138,7 +138,6 @@ export interface ShogiPosition {
 export interface ShogiMove {
   from: ShogiPosition;
   to: ShogiPosition;
-  piece: ShogiPiece;
   promotion?: boolean;
 }
 
@@ -149,8 +148,11 @@ export interface ShogiMove {
  */
 export interface ShogiGameState extends WinnableGameState {
   sfen: string;
+  inhand: string;
   black?: PlayerID;
+  blackReady?: boolean;
   white?: PlayerID;
+  whiteReady?: boolean;
   firstPlayer: ShogiColor;
 }
 
