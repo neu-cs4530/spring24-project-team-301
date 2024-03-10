@@ -125,11 +125,17 @@ export interface TicTacToeGameState extends WinnableGameState {
 export type ShogiPiece = 'P' | 'L' | 'N' | 'S' | 'G' | 'B' | 'R' | 'K' | 'p' | 'l' | 'n' | 's' | 'g' | 'b' | 'r' | 'k';
 
 /**
+ * Type for a position index in Shogi
+ */
+export type ShogiIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+
+/**
  * Type for a position on a Shogi board
  */
 export interface ShogiPosition {
-  row: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
-  col: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+  row: ShogiIndex;
+  col: ShogiIndex;
+
 }
 
 /**
@@ -138,7 +144,7 @@ export interface ShogiPosition {
 export interface ShogiMove {
   from: ShogiPosition;
   to: ShogiPosition;
-  piece: ShogiPiece;
+
   promotion?: boolean;
 }
 
@@ -149,9 +155,12 @@ export interface ShogiMove {
  */
 export interface ShogiGameState extends WinnableGameState {
   sfen: string;
+  inhand: string;
   black?: PlayerID;
+  blackReady?: boolean;
   white?: PlayerID;
-  firstPlayer: ShogiColor;
+  whiteReady?: boolean;
+  numMoves: number;
 }
 
 /**
