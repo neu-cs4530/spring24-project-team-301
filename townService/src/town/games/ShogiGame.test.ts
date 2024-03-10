@@ -6,16 +6,13 @@ import {
   GAME_FULL_MESSAGE,
   GAME_NOT_IN_PROGRESS_MESSAGE,
   GAME_NOT_STARTABLE_MESSAGE,
-  INVALID_MOVE_MESSAGE,
   MOVE_NOT_YOUR_TURN_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
 } from '../../lib/InvalidParametersError';
-import ConnectFourGame from './ConnectFourGame';
 
 describe('ShogiGame', () => {
   let game: ShogiGame;
-  let move: GameMove<ShogiMove>;
 
   beforeEach(() => {
     game = new ShogiGame();
