@@ -1,12 +1,21 @@
+import { timeStamp } from 'console';
 import InvalidParametersError, {
   BOARD_POSITION_NOT_VALID_MESSAGE,
   GAME_FULL_MESSAGE,
+  GAME_NOT_IN_PROGRESS_MESSAGE,
   GAME_NOT_STARTABLE_MESSAGE,
+  MOVE_NOT_YOUR_TURN_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
-import { GameMove, ShogiColor, ShogiGameState, ShogiMove } from '../../types/CoveyTownSocket';
+import {
+  GameMove,
+  ShogiColor,
+  ShogiGameState,
+  ShogiIndex,
+  ShogiMove,
+} from '../../types/CoveyTownSocket';
 import Game from './Game';
 
 /**
@@ -18,8 +27,8 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     super({
       sfen: 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL',
       inhand: '',
-      firstPlayer: 'black',
       status: 'WAITING_TO_START',
+      numMoves: 0,
     });
   }
 
@@ -62,7 +71,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
   /**
    * Translates sfen to a 2D array
    */
-  private get _board() {
+  public get _board() {
     const { sfen } = this.state;
     const ranks = sfen.split(' ')[0].split('/');
     const board = new Array(9).fill(' ').map(() => new Array(9).fill(' '));
@@ -128,7 +137,10 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     const piece = board[from.row][from.col];
     if (this.validateMoveOnBoard(move.move, board)) {
       const simulatedBoard = this._simulateMove(board, from, to, piece);
-      const isCheck = this._isCheck(simulatedBoard, piece);
+      const isCheck = this._isCheck(
+        simulatedBoard,
+        move.playerID === this.state.black ? 'white' : 'black',
+      );
 
       // If the player is in check after the move, the move is invalid
       if (isCheck) {
@@ -157,7 +169,15 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
   protected validateMoveOnBoard(move: ShogiMove, board: string[][]): boolean {
     const { from, to, promotion } = move;
     const piece = board[from.row][from.col];
-
+    if (
+      board[to.row][to.col] !== ' ' &&
+      ((piece.toLowerCase() === piece &&
+        board[to.row][to.col].toLowerCase() === board[to.row][to.col]) ||
+        (piece.toUpperCase() === piece &&
+          board[to.row][to.col].toUpperCase() === board[to.row][to.col]))
+    ) {
+      return false;
+    }
     if (promotion) {
       if (
         piece === 'K' ||
@@ -261,14 +281,14 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
       }
       return false;
     }
-    if (piece === 'G' || piece === "+S" || piece === "+N" || piece === "+L" || piece === "+P") {
-      if (from.col === to.col && from.row === to.row - 1) {
+    if (piece === 'G' || piece === '+S' || piece === '+N' || piece === '+L' || piece === '+P') {
+      if (from.col === to.col && from.row === to.row + 1) {
         return true;
       }
-      if (from.col === to.col + 1 && from.row === to.row - 1) {
+      if (from.col === to.col + 1 && from.row === to.row + 1) {
         return true;
       }
-      if (from.col === to.col - 1 && from.row === to.row - 1) {
+      if (from.col === to.col - 1 && from.row === to.row + 1) {
         return true;
       }
       if (from.col === to.col + 1 && from.row === to.row) {
@@ -277,19 +297,19 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
       if (from.col === to.col - 1 && from.row === to.row) {
         return true;
       }
-      if (from.col === to.col && from.row === to.row + 1) {
+      if (from.col === to.col && from.row === to.row - 1) {
         return true;
       }
       return false;
     }
-    if (piece === 'g' || piece === "+s" || piece === "+n" || piece === "+l" || piece === "+p") {
+    if (piece === 'g' || piece === '+s' || piece === '+n' || piece === '+l' || piece === '+p') {
       if (from.col === to.col && from.row === to.row - 1) {
         return true;
       }
-      if (from.col === to.col + 1 && from.row === to.row + 1) {
+      if (from.col === to.col + 1 && from.row === to.row - 1) {
         return true;
       }
-      if (from.col === to.col - 1 && from.row === to.row + 1) {
+      if (from.col === to.col - 1 && from.row === to.row - 1) {
         return true;
       }
       if (from.col === to.col + 1 && from.row === to.row) {
@@ -393,13 +413,13 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     return true;
   }
 
-  private _isCheck(board: string[][], piece: string): boolean {
+  private _isCheck(board: string[][], color: ShogiColor): boolean {
     // Determine the position of the king
     let kingRow = -1;
     let kingCol = -1;
     for (let i = 0; i < board.length; i++) {
       for (let j = 0; j < board[i].length; j++) {
-        if (board[i][j] === piece.toUpperCase()) {
+        if (board[i][j] === (color === 'black' ? 'k' : 'K')) {
           kingRow = i;
           kingCol = j;
           break;
@@ -412,7 +432,9 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
       for (let j = 0; j < board[i].length; j++) {
         const opponentPiece = board[i][j];
         if (
-          opponentPiece.toLowerCase() === opponentPiece &&
+          opponentPiece !== ' ' &&
+          ((opponentPiece.toLowerCase() === opponentPiece && color === 'white') ||
+            (opponentPiece.toUpperCase() === opponentPiece && color === 'black')) &&
           this.validateMoveOnBoard(
             { from: { row: i, col: j }, to: { row: kingRow, col: kingCol } } as ShogiMove,
             board,
@@ -422,8 +444,61 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
         }
       }
     }
-
     return false;
+  }
+
+  /**
+   * Checks if the given color's king is in checkmate.
+   * @param color The color of the king to check for checkmate.
+   * @returns True if the king is in checkmate, false otherwise.
+   */
+  private _isKingInCheckmate(color: ShogiColor): boolean {
+    const kingPiece = color === 'black' ? 'K' : 'k';
+    const board = this._board;
+    // Find the position of the king
+    let kingRow = -1;
+    let kingCol = -1;
+    for (let i = 0; i < board.length; i++) {
+      for (let j = 0; j < board[i].length; j++) {
+        if (board[i][j] === kingPiece) {
+          kingRow = i;
+          kingCol = j;
+          break;
+        }
+      }
+    }
+
+    // If the king is not found, return false (not in checkmate)
+    if (kingRow === -1 || kingCol === -1) {
+      return false;
+    }
+
+    // Check if the king can move to any adjacent square
+    for (let dr = -1; dr <= 1; dr++) {
+      for (let dc = -1; dc <= 1; dc++) {
+        const newRow = kingRow + dr;
+        const newCol = kingCol + dc;
+        if (newRow >= 0 && newRow < 9 && newCol >= 0 && newCol < 9) {
+          const pId = color === 'black' ? this.state.black : this.state.white;
+          const move: ShogiMove = {
+            from: { row: kingRow as ShogiIndex, col: kingCol as ShogiIndex },
+            to: { row: newRow as ShogiIndex, col: newCol as ShogiIndex },
+            promotion: false,
+          };
+          const simulatedMove: GameMove<ShogiMove> = {
+            gameID: this.id,
+            move,
+            playerID: pId as string,
+          };
+          if (this.validateMove(simulatedMove)) {
+            // The king can move to this square, so it's not in checkmate
+            return false;
+          }
+        }
+      }
+    }
+    // The king cannot move to any adjacent square, so it's in checkmate
+    return true;
   }
 
   /**
@@ -431,6 +506,15 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
    * @param move The move to apply to the game state
    */
   public applyMove(move: GameMove<ShogiMove>): void {
+    if (this.state.status !== 'IN_PROGRESS') {
+      throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+    }
+    if (move.playerID !== this.state.black && move.playerID !== this.state.white) {
+      throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
+    }
+    if (move.playerID !== (this.state.numMoves % 2 === 0 ? this.state.black : this.state.white)) {
+      throw new InvalidParametersError(MOVE_NOT_YOUR_TURN_MESSAGE);
+    }
     const {
       move: { from, to, promotion },
     } = move;
@@ -438,14 +522,26 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
       const board = this._board;
       const piece = board[from.row][from.col];
       board[from.row][from.col] = ' ';
-      board[to.row][to.col] = promotion ? "+" + piece : piece;
+      board[to.row][to.col] = promotion ? `+${piece}` : piece;
       this.state = {
         ...this.state,
         sfen: this._boardToSfen(board),
-        status: 'IN_PROGRESS',
+        numMoves: this.state.numMoves + 1,
       };
+      if (
+        this._isCheck(board, this.state.numMoves % 2 === 0 ? 'white' : 'black') &&
+        this._isKingInCheckmate(this.state.numMoves % 2 === 0 ? 'black' : 'white')
+      ) {
+        this.state = {
+          ...this.state,
+          status: 'OVER',
+          winner: this.state.numMoves % 2 === 0 ? this.state.white : this.state.black,
+        };
+      }
     } else {
-      throw new InvalidParametersError(BOARD_POSITION_NOT_VALID_MESSAGE + this._board[from.row][from.col]);
+      throw new InvalidParametersError(
+        BOARD_POSITION_NOT_VALID_MESSAGE + this._board[from.row][from.col],
+      );
     }
   }
 
