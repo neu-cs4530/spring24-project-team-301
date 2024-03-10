@@ -164,8 +164,8 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
         piece === 'k' ||
         piece === 'G' ||
         piece === 'g' ||
-        (piece.toUpperCase() !== piece && to.row < 7) ||
-        (piece.toLowerCase() === piece && to.row > 2)
+        (piece.toUpperCase() !== piece && to.row < 6) ||
+        (piece.toLowerCase() !== piece && to.row > 2)
       ) {
         return false;
       }
@@ -261,7 +261,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
       }
       return false;
     }
-    if (piece === 'G') {
+    if (piece === 'G' || piece === "+S" || piece === "+N" || piece === "+L" || piece === "+P") {
       if (from.col === to.col && from.row === to.row - 1) {
         return true;
       }
@@ -282,7 +282,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
       }
       return false;
     }
-    if (piece === 'g') {
+    if (piece === 'g' || piece === "+s" || piece === "+n" || piece === "+l" || piece === "+p") {
       if (from.col === to.col && from.row === to.row - 1) {
         return true;
       }
@@ -303,7 +303,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
       }
       return false;
     }
-    if (piece === 'B') {
+    if (piece === 'B' || piece === 'b') {
       if (Math.abs(from.row - to.row) === Math.abs(from.col - to.col)) {
         const rowDirection = from.row < to.row ? 1 : -1;
         const colDirection = from.col < to.col ? 1 : -1;
@@ -316,7 +316,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
       }
       return false;
     }
-    if (piece === 'b') {
+    if (piece === '+B' || piece === '+b') {
       if (Math.abs(from.row - to.row) === Math.abs(from.col - to.col)) {
         const rowDirection = from.row < to.row ? 1 : -1;
         const colDirection = from.col < to.col ? 1 : -1;
@@ -327,9 +327,12 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
         }
         return true;
       }
+      if (Math.abs(from.row - to.row) <= 1 && Math.abs(from.col - to.col) <= 1) {
+        return true;
+      }
       return false;
     }
-    if (piece === 'R') {
+    if (piece === 'R' || piece === 'r') {
       if (from.row === to.row) {
         const direction = from.col < to.col ? 1 : -1;
         for (let i = from.col + direction; i !== to.col; i += direction) {
@@ -350,7 +353,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
       }
       return false;
     }
-    if (piece === 'r') {
+    if (piece === '+R' || piece === '+r') {
       if (from.row === to.row) {
         const direction = from.col < to.col ? 1 : -1;
         for (let i = from.col + direction; i !== to.col; i += direction) {
@@ -367,8 +370,12 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
             return false;
           }
         }
+        if (Math.abs(from.row - to.row) <= 1 && Math.abs(from.col - to.col) <= 1) {
+          return true;
+        }
         return true;
       }
+
       return false;
     }
     if (piece === 'K') {
@@ -425,20 +432,20 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
    */
   public applyMove(move: GameMove<ShogiMove>): void {
     const {
-      move: { from, to },
+      move: { from, to, promotion },
     } = move;
     if (this.validateMove(move)) {
       const board = this._board;
       const piece = board[from.row][from.col];
       board[from.row][from.col] = ' ';
-      board[to.row][to.col] = piece;
+      board[to.row][to.col] = promotion ? "+" + piece : piece;
       this.state = {
         ...this.state,
         sfen: this._boardToSfen(board),
         status: 'IN_PROGRESS',
       };
     } else {
-      throw new InvalidParametersError(BOARD_POSITION_NOT_VALID_MESSAGE);
+      throw new InvalidParametersError(BOARD_POSITION_NOT_VALID_MESSAGE + this._board[from.row][from.col]);
     }
   }
 

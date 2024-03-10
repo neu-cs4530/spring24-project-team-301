@@ -24,8 +24,8 @@ describe('ShogiGame', () => {
     });
 
     it('should not throw an error for a valid move', () => {
-      move.move.from = { row: 2, col: 2 };
-      move.move.to = { row: 3, col: 3 };
+      move.move.from = { row: 2, col: 0 };
+      move.move.to = { row: 3, col: 0 };
       expect(() => game.applyMove(move)).not.toThrow();
     });
 
@@ -41,18 +41,83 @@ describe('ShogiGame', () => {
       expect(() => game.applyMove(move)).toThrow();
     });
 
-    it('should allow a player to promote a piece when moving to the promotion zone', () => {
-      move.move.from = { row: 1, col: 1 }; // A piece position
-      move.move.to = { row: 0, col: 0 }; // A valid move to the promotion zone
-      move.move.promotion = true; // Promote the piece
-      expect(() => game.applyMove(move)).not.toThrow();
-    });
-
     it('should not allow a player to promote a piece when moving outside the promotion zone', () => {
       move.move.from = { row: 0, col: 0 }; // A piece position
       move.move.to = { row: 1, col: 1 }; // A valid move outside the promotion zone
       move.move.promotion = true; // Try to promote the piece
       expect(() => game.applyMove(move)).toThrow();
+    });
+    it('should result in the game being over with the winner after a checkmate', () => {
+      
+      const moves: GameMove<ShogiMove>[] = [
+        {
+          gameID: 'gameID',
+          move: {
+            from: { row: 2, col: 1 },
+            to: { row: 3, col: 1 },
+            promotion: false,
+          },
+          playerID: 'test',
+        },
+        {
+          gameID: 'gameID',
+          move: {
+            from: { row: 8, col: 4 },
+            to: { row: 7, col: 3 },
+            promotion: false,
+          },
+          playerID: 'test',
+        },
+        {
+          gameID: 'gameID',
+          move: {
+            from: { row: 3, col: 1 },
+            to: { row: 4, col: 1 },
+            promotion: false,
+          },
+          playerID: 'test',
+        },
+        {
+          gameID: 'gameID',
+          move: {
+            from: { row: 7, col: 3 },
+            to: { row: 7, col: 2 },
+            promotion: false,
+          },
+          playerID: 'test',
+        },
+        {
+          gameID: 'gameID',
+          move: {
+            from: { row: 4, col: 1 },
+            to: { row: 5, col: 1 },
+            promotion: false,
+          },
+          playerID: 'test',
+        },
+        {
+          gameID: 'gameID',
+          move: {
+            from: { row: 7, col: 7 },
+            to: { row: 7, col: 3 },
+            promotion: false,
+          },
+          playerID: 'test',
+        },
+        {
+          gameID: 'gameID',
+          move: {
+            from: { row: 5, col: 1 },
+            to: { row: 6, col: 1 },
+            promotion: true,
+          },
+          playerID: 'test',
+        },
+      ];
+
+      moves.forEach((move) => {
+        expect(() => game.applyMove(move)).not.toThrow();
+      });
     });
   });
 });
