@@ -611,6 +611,11 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     }
   }
 
+  /**
+   * Attempt to spectate a game.
+   * @param player The player to spectate the game.
+   * @throws InvalidParametersError if the player can not spectate the game
+   */
   public spectate(player: Player): void {
     this._spectate(player);
     // TODO: implement spectators ... this._spectators.push(player);
