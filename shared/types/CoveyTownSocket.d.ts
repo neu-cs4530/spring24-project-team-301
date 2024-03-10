@@ -135,6 +135,7 @@ export type ShogiIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export interface ShogiPosition {
   row: ShogiIndex;
   col: ShogiIndex;
+
 }
 
 /**
@@ -143,6 +144,7 @@ export interface ShogiPosition {
 export interface ShogiMove {
   from: ShogiPosition;
   to: ShogiPosition;
+
   promotion?: boolean;
 }
 
