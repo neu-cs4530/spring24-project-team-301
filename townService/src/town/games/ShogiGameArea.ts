@@ -6,6 +6,7 @@ import InvalidParametersError, {
 import Player from '../../lib/Player';
 import {
   ShogiGameState,
+  ShogiMove,
   GameInstance,
   InteractableCommand,
   InteractableCommandReturnType,
@@ -85,13 +86,10 @@ export default class ShogiGameArea extends GameArea<ShogiGame> {
       if (this._game?.id !== command.gameID) {
         throw new InvalidParametersError(GAME_ID_MISSMATCH_MESSAGE);
       }
-      if (command.move.gamePiece !== 'Red' && command.move.gamePiece !== 'Yellow') {
-        throw new InvalidParametersError('Invalid game piece');
-      }
       game.applyMove({
         gameID: command.gameID,
         playerID: player.id,
-        move: command.move,
+        move: command.move as ShogiMove,
       });
       this._stateUpdated(game.toModel());
       return undefined as InteractableCommandReturnType<CommandType>;
@@ -100,7 +98,7 @@ export default class ShogiGameArea extends GameArea<ShogiGame> {
       let game = this._game;
       if (!game || game.state.status === 'OVER') {
         // No game in progress, make a new one
-        game = new ShogiGame(this._game);
+        game = new ShogiGame();
         this._game = game;
       }
       game.join(player);

@@ -19,8 +19,7 @@ import {
 import Game from './Game';
 
 /**
- * A ConnectFourGame is a Game that implements the rules of Connect Four.
- * @see https://en.wikipedia.org/wiki/Connect_Four
+ * A ShogiGame is a Game that implements the rules of Shogi.
  */
 export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
   public constructor() {
@@ -610,5 +609,20 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
         // This behavior can be undefined :)
         throw new Error(`Unexpected game status: ${this.state.status}`);
     }
+  }
+
+  public spectate(player: Player): void {
+    this._spectate(player);
+    // TODO: implement spectators ... this._spectators.push(player);
+  }
+
+  protected _spectate(player: Player): void {
+    if (this.state.status !== 'IN_PROGRESS') {
+      throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+    }
+    if (this.state.black === player.id || this.state.white === player.id) {
+      throw new InvalidParametersError(PLAYER_ALREADY_IN_GAME_MESSAGE);
+    }
+    // TODO: add player as a spectator in the game. update the state
   }
 }
