@@ -6,6 +6,7 @@ import InvalidParametersError, {
 import Player from '../../lib/Player';
 import {
   ConnectFourGameState,
+  ConnectFourMove,
   GameInstance,
   InteractableCommand,
   InteractableCommandReturnType,
@@ -85,13 +86,14 @@ export default class ConnectFourGameArea extends GameArea<ConnectFourGame> {
       if (this._game?.id !== command.gameID) {
         throw new InvalidParametersError(GAME_ID_MISSMATCH_MESSAGE);
       }
-      if (command.move.gamePiece !== 'Red' && command.move.gamePiece !== 'Yellow') {
+      const connectFourMove = command.move as ConnectFourMove;
+      if (connectFourMove.gamePiece !== 'Red' && connectFourMove.gamePiece !== 'Yellow') {
         throw new InvalidParametersError('Invalid game piece');
       }
       game.applyMove({
         gameID: command.gameID,
         playerID: player.id,
-        move: command.move,
+        move: command.move as ConnectFourMove,
       });
       this._stateUpdated(game.toModel());
       return undefined as InteractableCommandReturnType<CommandType>;

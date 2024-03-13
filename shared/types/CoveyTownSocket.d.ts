@@ -17,7 +17,7 @@ export type TownJoinResponse = {
   interactables: TypedInteractable[];
 }
 
-export type InteractableType = 'ConversationArea' | 'ViewingArea' | 'TicTacToeArea' | 'ConnectFourArea';
+export type InteractableType = 'ConversationArea' | 'ViewingArea' | 'TicTacToeArea' | 'ConnectFourArea' | 'ShogiArea';
 export interface Interactable {
   type: InteractableType;
   id: InteractableID;
@@ -119,6 +119,7 @@ export interface TicTacToeGameState extends WinnableGameState {
   x?: PlayerID;
   o?: PlayerID;
 }
+
 /**
  * Type for a piece in Shogi
  */
@@ -264,13 +265,16 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | StartGameCommand | LeaveGameCommand;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | SpectateCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<ShogiMove> | StartGameCommand | LeaveGameCommand;
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;
 }
 export interface JoinGameCommand {
   type: 'JoinGame';
+}
+export interface SpectateCommand {
+  type: 'Spectate';
 }
 export interface LeaveGameCommand {
   type: 'LeaveGame';
@@ -286,7 +290,8 @@ export interface GameMoveCommand<MoveType> {
   move: MoveType;
 }
 export type InteractableCommandReturnType<CommandType extends InteractableCommand> = 
-  CommandType extends JoinGameCommand ? { gameID: string}:
+  CommandType extends JoinGameCommand ? { gameID: string} :
+  CommandType extends SpectateCommand ? { gameID: string} :
   CommandType extends ViewingAreaUpdateCommand ? undefined :
   CommandType extends GameMoveCommand<TicTacToeMove> ? undefined :
   CommandType extends LeaveGameCommand ? undefined :
