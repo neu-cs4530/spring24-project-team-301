@@ -3,7 +3,7 @@ import ShogiAreaController, {
 } from '../../../../classes/interactable/ShogiAreaController';
 import { Button, chakra, Container, useToast } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
-import { ConnectFourColIndex } from '../../../../types/CoveyTownSocket';
+import { ShogiIndex } from '../../../../types/CoveyTownSocket';
 
 export type ShogiGameProps = {
   gameAreaController: ShogiAreaController;
@@ -52,9 +52,10 @@ const StyledShogiSquare = chakra(Button, {
  *
  * @param gameAreaController the controller for the ConnectFour game
  */
-export default function ConnectFourBoard({ gameAreaController }: ShogiGameProps): JSX.Element {
+export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.Element {
   const [board, setBoard] = useState<ShogiCell[][]>(gameAreaController.board);
   const [isOurTurn, setIsOurTurn] = useState(gameAreaController.isOurTurn);
+  const [from, setFrom] = useState({ row: -1, col: -1 });
   const toast = useToast();
   useEffect(() => {
     gameAreaController.addListener('turnChanged', setIsOurTurn);
@@ -65,20 +66,37 @@ export default function ConnectFourBoard({ gameAreaController }: ShogiGameProps)
     };
   }, [gameAreaController]);
   return (
-    <StyledShogiBoard aria-label='Connect Four Board'>
+    <StyledShogiBoard aria-label='Shogi Board'>
       {board.map((row, rowIndex) => {
         return row.map((cell, colIndex) => {
           return (
             <StyledShogiSquare
               key={`${rowIndex}.${colIndex}`}
               onClick={async () => {
-                try {
-                  await gameAreaController.makeMove(colIndex as ConnectFourColIndex);
-                } catch (e) {
-                  toast({
-                    title: 'Error making move',
-                    description: (e as Error).toString(),
-                    status: 'error',
+                if (from.row !== -1 && !(from.row === rowIndex && from.row === colIndex)) {
+                  try {
+                    await gameAreaController.makeMove(
+                      from.row as ShogiIndex,
+                      from.col as ShogiIndex,
+                      rowIndex as ShogiIndex,
+                      colIndex as ShogiIndex,
+                    );
+                  } catch (e) {
+                    toast({
+                      title: 'Error making move',
+                      description: (e as Error).toString(),
+                      status: 'error',
+                    });
+                  }
+                } else if (from.row === rowIndex && from.row === colIndex) {
+                  setFrom({
+                    row: -1,
+                    col: -1,
+                  });
+                } else {
+                  setFrom({
+                    row: rowIndex,
+                    col: colIndex,
                   });
                 }
               }}
