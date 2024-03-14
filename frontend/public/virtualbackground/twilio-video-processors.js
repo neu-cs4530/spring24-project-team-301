@@ -73,7 +73,19 @@ documented below.
       function (require, module, exports) {
         'use strict';
         Object.defineProperty(exports, '__esModule', { value: true });
-        exports.WASM_INFERENCE_DIMENSIONS = exports.BODYPIX_INFERENCE_DIMENSIONS = exports.INFERENCE_CONFIG = exports.MODEL_CONFIG = exports.TFLITE_SIMD_LOADER_NAME = exports.TFLITE_LOADER_NAME = exports.MODEL_NAME = exports.PERSON_PROBABILITY_THRESHOLD = exports.HISTORY_COUNT = exports.MASK_BLUR_RADIUS = exports.DEBOUNCE = exports.BLUR_FILTER_RADIUS = void 0;
+        exports.WASM_INFERENCE_DIMENSIONS =
+          exports.BODYPIX_INFERENCE_DIMENSIONS =
+          exports.INFERENCE_CONFIG =
+          exports.MODEL_CONFIG =
+          exports.TFLITE_SIMD_LOADER_NAME =
+          exports.TFLITE_LOADER_NAME =
+          exports.MODEL_NAME =
+          exports.PERSON_PROBABILITY_THRESHOLD =
+          exports.HISTORY_COUNT =
+          exports.MASK_BLUR_RADIUS =
+          exports.DEBOUNCE =
+          exports.BLUR_FILTER_RADIUS =
+            void 0;
         exports.BLUR_FILTER_RADIUS = 15;
         exports.DEBOUNCE = 2;
         exports.MASK_BLUR_RADIUS = 5;
@@ -122,7 +134,12 @@ documented below.
             return __assign.apply(this, arguments);
           };
         Object.defineProperty(exports, '__esModule', { value: true });
-        exports.VirtualBackgroundProcessor = exports.version = exports.isSupported = exports.ImageFit = exports.GaussianBlurBackgroundProcessor = void 0;
+        exports.VirtualBackgroundProcessor =
+          exports.version =
+          exports.isSupported =
+          exports.ImageFit =
+          exports.GaussianBlurBackgroundProcessor =
+            void 0;
         var GaussianBlurBackgroundProcessor_1 = require('./processors/background/GaussianBlurBackgroundProcessor');
         Object.defineProperty(exports, 'GaussianBlurBackgroundProcessor', {
           enumerable: true,
@@ -291,8 +308,8 @@ documented below.
                         op[0] & 2
                           ? y['return']
                           : op[0]
-                          ? y['throw'] || ((t = y['return']) && t.call(y), 0)
-                          : y.next) &&
+                            ? y['throw'] || ((t = y['return']) && t.call(y), 0)
+                            : y.next) &&
                       !(t = t.call(y, op[1])).done)
                   )
                     return t;
@@ -1501,8 +1518,8 @@ documented below.
                         op[0] & 2
                           ? y['return']
                           : op[0]
-                          ? y['throw'] || ((t = y['return']) && t.call(y), 0)
-                          : y.next) &&
+                            ? y['throw'] || ((t = y['return']) && t.call(y), 0)
+                            : y.next) &&
                       !(t = t.call(y, op[1])).done)
                   )
                     return t;
@@ -1562,7 +1579,11 @@ documented below.
             }
           };
         Object.defineProperty(exports, '__esModule', { value: true });
-        exports.load = exports.BodyPix = exports.MULTI_PERSON_INSTANCE_INFERENCE_CONFIG = exports.PERSON_INFERENCE_CONFIG = void 0;
+        exports.load =
+          exports.BodyPix =
+          exports.MULTI_PERSON_INSTANCE_INFERENCE_CONFIG =
+          exports.PERSON_INFERENCE_CONFIG =
+            void 0;
         var tfconv = require('@tensorflow/tfjs-converter');
         var tf = require('@tensorflow/tfjs-core');
         var decode_part_map_1 = require('./decode_part_map');
@@ -2737,7 +2758,10 @@ documented below.
          * =============================================================================
          */
         Object.defineProperty(exports, '__esModule', { value: true });
-        exports.decodeOnlyPartSegmentation = exports.decodePartSegmentation = exports.toMaskTensor = void 0;
+        exports.decodeOnlyPartSegmentation =
+          exports.decodePartSegmentation =
+          exports.toMaskTensor =
+            void 0;
         var tf = require('@tensorflow/tfjs-core');
         /**
          * Takes the sigmoid of the part heatmap output and generates a 2d one-hot
@@ -2954,7 +2978,12 @@ documented below.
          * =============================================================================
          */
         Object.defineProperty(exports, '__esModule', { value: true });
-        exports.CONNECTED_PART_INDICES = exports.POSE_CHAIN = exports.PART_IDS = exports.NUM_KEYPOINTS = exports.PART_NAMES = void 0;
+        exports.CONNECTED_PART_INDICES =
+          exports.POSE_CHAIN =
+          exports.PART_IDS =
+          exports.NUM_KEYPOINTS =
+          exports.PART_NAMES =
+            void 0;
         exports.PART_NAMES = [
           'nose',
           'leftEye',
@@ -3298,8 +3327,8 @@ documented below.
                         op[0] & 2
                           ? y['return']
                           : op[0]
-                          ? y['throw'] || ((t = y['return']) && t.call(y), 0)
-                          : y.next) &&
+                            ? y['throw'] || ((t = y['return']) && t.call(y), 0)
+                            : y.next) &&
                       !(t = t.call(y, op[1])).done)
                   )
                     return t;
@@ -3359,7 +3388,11 @@ documented below.
             }
           };
         Object.defineProperty(exports, '__esModule', { value: true });
-        exports.decodePersonInstancePartMasks = exports.decodePersonInstanceMasks = exports.toPersonKPartSegmentation = exports.toPersonKSegmentation = void 0;
+        exports.decodePersonInstancePartMasks =
+          exports.decodePersonInstanceMasks =
+          exports.toPersonKPartSegmentation =
+          exports.toPersonKSegmentation =
+            void 0;
         var tf = require('@tensorflow/tfjs-core');
         var tfjs_core_1 = require('@tensorflow/tfjs-core');
         var decode_multiple_masks_cpu_1 = require('./decode_multiple_masks_cpu');
@@ -3585,18 +3618,19 @@ documented below.
                   return [4 /*yield*/, partSegmentation.data()];
                 case 5:
                   partSegmentaionData = _b.sent();
-                  partSegmentationsByPersonData = decode_multiple_masks_cpu_1.decodeMultiplePartMasksCPU(
-                    segmentationsData,
-                    longOffsetsData,
-                    partSegmentaionData,
-                    posesAboveScore,
-                    height,
-                    width,
-                    stride,
-                    [inHeight, inWidth],
-                    padding,
-                    refineSteps,
-                  );
+                  partSegmentationsByPersonData =
+                    decode_multiple_masks_cpu_1.decodeMultiplePartMasksCPU(
+                      segmentationsData,
+                      longOffsetsData,
+                      partSegmentaionData,
+                      posesAboveScore,
+                      height,
+                      width,
+                      stride,
+                      [inHeight, inWidth],
+                      padding,
+                      refineSteps,
+                    );
                   _b.label = 6;
                 case 6:
                   return [
@@ -4045,8 +4079,7 @@ documented below.
               result += score;
             }
             return result;
-          },
-          0.0);
+          }, 0.0);
           return (notOverlappedKeypointScores /= instanceKeypoints.length);
         }
         // A point (y, x) is considered as root part candidate if its score is a
@@ -4466,7 +4499,15 @@ documented below.
          * =============================================================================
          */
         Object.defineProperty(exports, '__esModule', { value: true });
-        exports.clampVector = exports.addVectors = exports.squaredDistance = exports.clamp = exports.fillArray = exports.getImageCoords = exports.getOffsetPoint = exports.getScale = void 0;
+        exports.clampVector =
+          exports.addVectors =
+          exports.squaredDistance =
+          exports.clamp =
+          exports.fillArray =
+          exports.getImageCoords =
+          exports.getOffsetPoint =
+          exports.getScale =
+            void 0;
         var keypoints_1 = require('../keypoints');
         function getScale(_a, _b, padding) {
           var height = _a[0],
@@ -4557,7 +4598,13 @@ documented below.
          * =============================================================================
          */
         Object.defineProperty(exports, '__esModule', { value: true });
-        exports.blurBodyPart = exports.drawBokehEffect = exports.drawPixelatedMask = exports.drawMask = exports.toColoredPartMask = exports.toMask = void 0;
+        exports.blurBodyPart =
+          exports.drawBokehEffect =
+          exports.drawPixelatedMask =
+          exports.drawMask =
+          exports.toColoredPartMask =
+          exports.toMask =
+            void 0;
         var blur_1 = require('./blur');
         var util_1 = require('./util');
         var offScreenCanvases = {};
@@ -5569,8 +5616,8 @@ documented below.
                         op[0] & 2
                           ? y['return']
                           : op[0]
-                          ? y['throw'] || ((t = y['return']) && t.call(y), 0)
-                          : y.next) &&
+                            ? y['throw'] || ((t = y['return']) && t.call(y), 0)
+                            : y.next) &&
                       !(t = t.call(y, op[1])).done)
                   )
                     return t;
@@ -5631,7 +5678,22 @@ documented below.
           };
         var _a;
         Object.defineProperty(exports, '__esModule', { value: true });
-        exports.scaleAndFlipPoses = exports.flipPosesHorizontal = exports.flipPoseHorizontal = exports.scalePoses = exports.scalePose = exports.toTensorBuffers3D = exports.padAndResizeTo = exports.resize2d = exports.removePaddingAndResizeBack = exports.scaleAndCropToInputTensorShape = exports.resizeAndPadTo = exports.toInputTensor = exports.toInputResolutionHeightAndWidth = exports.toValidInputResolution = exports.getInputSize = void 0;
+        exports.scaleAndFlipPoses =
+          exports.flipPosesHorizontal =
+          exports.flipPoseHorizontal =
+          exports.scalePoses =
+          exports.scalePose =
+          exports.toTensorBuffers3D =
+          exports.padAndResizeTo =
+          exports.resize2d =
+          exports.removePaddingAndResizeBack =
+          exports.scaleAndCropToInputTensorShape =
+          exports.resizeAndPadTo =
+          exports.toInputTensor =
+          exports.toInputResolutionHeightAndWidth =
+          exports.toValidInputResolution =
+          exports.getInputSize =
+            void 0;
         var tf = require('@tensorflow/tfjs-core');
         function getSizeFromImageLikeElement(input) {
           if (
@@ -6159,8 +6221,8 @@ PERFORMANCE OF THIS SOFTWARE.
                       op[0] & 2
                         ? y['return']
                         : op[0]
-                        ? y['throw'] || ((t = y['return']) && t.call(y), 0)
-                        : y.next) &&
+                          ? y['throw'] || ((t = y['return']) && t.call(y), 0)
+                          : y.next) &&
                     !(t = t.call(y, op[1])).done)
                 )
                   return t;
@@ -7671,17 +7733,14 @@ PERFORMANCE OF THIS SOFTWARE.
         var multiplyImpl = createSimpleBinaryKernelImpl(function (aValue, bValue) {
           return aValue * bValue;
         });
-        var multiplyComplexImpl = createComplexBinaryKernelImpl(function (
-          aReal,
-          aImag,
-          bReal,
-          bImag,
-        ) {
-          return {
-            real: aReal * bReal - aImag * bImag,
-            imag: aReal * bImag + aImag * bReal,
-          };
-        });
+        var multiplyComplexImpl = createComplexBinaryKernelImpl(
+          function (aReal, aImag, bReal, bImag) {
+            return {
+              real: aReal * bReal - aImag * bImag,
+              imag: aReal * bImag + aImag * bReal,
+            };
+          },
+        );
         var multiply = binaryKernelFunc(tfjsCore.Multiply, multiplyImpl, multiplyComplexImpl);
         var multiplyConfig = {
           kernelName: tfjsCore.Multiply,
@@ -18247,8 +18306,8 @@ PERFORMANCE OF THIS SOFTWARE.
                       op[0] & 2
                         ? y['return']
                         : op[0]
-                        ? y['throw'] || ((t = y['return']) && t.call(y), 0)
-                        : y.next) &&
+                          ? y['throw'] || ((t = y['return']) && t.call(y), 0)
+                          : y.next) &&
                     !(t = t.call(y, op[1])).done)
                 )
                   return t;
@@ -19987,26 +20046,7 @@ and columns.
         function createVertexBuffer(gl) {
           // [x y z u v] * [upper-left, lower-left, upper-right, lower-right]
           var vertexArray = new Float32Array([
-            -1,
-            1,
-            0,
-            0,
-            1,
-            -1,
-            -1,
-            0,
-            0,
-            0,
-            1,
-            1,
-            0,
-            1,
-            1,
-            1,
-            -1,
-            0,
-            1,
-            0,
+            -1, 1, 0, 0, 1, -1, -1, 0, 0, 0, 1, 1, 0, 1, 1, 1, -1, 0, 1, 0,
           ]);
           return createStaticVertexBuffer(gl, vertexArray);
         }
@@ -20309,18 +20349,21 @@ and columns.
           createFloat32MatrixTexture: createFloat32MatrixTexture,
           getInternalFormatForFloat16MatrixTexture: getInternalFormatForFloat16MatrixTexture,
           createFloat16MatrixTexture: createFloat16MatrixTexture,
-          getInternalFormatForUnsignedBytesMatrixTexture: getInternalFormatForUnsignedBytesMatrixTexture,
+          getInternalFormatForUnsignedBytesMatrixTexture:
+            getInternalFormatForUnsignedBytesMatrixTexture,
           createUnsignedBytesMatrixTexture: createUnsignedBytesMatrixTexture,
           getInternalFormatForPackedMatrixTexture: getInternalFormatForPackedMatrixTexture,
           createPackedMatrixTexture: createPackedMatrixTexture,
-          getInternalFormatForFloat16PackedMatrixTexture: getInternalFormatForFloat16PackedMatrixTexture,
+          getInternalFormatForFloat16PackedMatrixTexture:
+            getInternalFormatForFloat16PackedMatrixTexture,
           createFloat16PackedMatrixTexture: createFloat16PackedMatrixTexture,
           bindVertexProgramAttributeStreams: bindVertexProgramAttributeStreams,
           uploadDenseMatrixToTexture: uploadDenseMatrixToTexture,
           uploadPixelDataToTexture: uploadPixelDataToTexture,
           createBufferFromOutputTexture: createBufferFromOutputTexture,
           downloadFloat32MatrixFromBuffer: downloadFloat32MatrixFromBuffer,
-          downloadByteEncodedFloatMatrixFromOutputTexture: downloadByteEncodedFloatMatrixFromOutputTexture,
+          downloadByteEncodedFloatMatrixFromOutputTexture:
+            downloadByteEncodedFloatMatrixFromOutputTexture,
           downloadPackedMatrixFromBuffer: downloadPackedMatrixFromBuffer,
           downloadMatrixFromPackedOutputTexture: downloadMatrixFromPackedOutputTexture,
         };
@@ -40565,8 +40608,8 @@ PERFORMANCE OF THIS SOFTWARE.
                           op[0] & 2
                             ? y['return']
                             : op[0]
-                            ? y['throw'] || ((t = y['return']) && t.call(y), 0)
-                            : y.next) &&
+                              ? y['throw'] || ((t = y['return']) && t.call(y), 0)
+                              : y.next) &&
                         !(t = t.call(y, op[1])).done)
                     )
                       return t;
@@ -40814,8 +40857,8 @@ PERFORMANCE OF THIS SOFTWARE.
                   inputParam.inputIndexEnd === 0
                     ? undefined
                     : inputParam.inputIndexEnd === undefined
-                    ? start + 1
-                    : inputParam.inputIndexEnd;
+                      ? start + 1
+                      : inputParam.inputIndexEnd;
                 if (inputParam.type === 'tensor') {
                   return getTensor(
                     node.inputNames[inputParam.inputIndexStart],
@@ -50038,8 +50081,8 @@ PERFORMANCE OF THIS SOFTWARE.
             exports.loadGraphModel = loadGraphModel;
             exports.registerOp = registerOp;
             exports.version_converter = version;
-          }.call(this));
-        }.call(this, require('buffer').Buffer));
+          }).call(this);
+        }).call(this, require('buffer').Buffer);
       },
       { '@tensorflow/tfjs-core': 35, 'buffer': 38 },
     ],
@@ -50184,8 +50227,8 @@ PERFORMANCE OF THIS SOFTWARE.
                           op[0] & 2
                             ? y['return']
                             : op[0]
-                            ? y['throw'] || ((t = y['return']) && t.call(y), 0)
-                            : y.next) &&
+                              ? y['throw'] || ((t = y['return']) && t.call(y), 0)
+                              : y.next) &&
                         !(t = t.call(y, op[1])).done)
                     )
                       return t;
@@ -51691,292 +51734,21 @@ PERFORMANCE OF THIS SOFTWARE.
               wasm = new WebAssembly.Instance(
                 new WebAssembly.Module(
                   new Uint8Array([
-                    0,
-                    97,
-                    115,
-                    109,
-                    1,
-                    0,
-                    0,
-                    0,
-                    1,
-                    13,
-                    2,
-                    96,
-                    0,
-                    1,
-                    127,
-                    96,
-                    4,
-                    127,
-                    127,
-                    127,
-                    127,
-                    1,
-                    127,
-                    3,
-                    7,
-                    6,
-                    0,
-                    1,
-                    1,
-                    1,
-                    1,
-                    1,
-                    6,
-                    6,
-                    1,
-                    127,
-                    1,
-                    65,
-                    0,
-                    11,
-                    7,
-                    50,
-                    6,
-                    3,
-                    109,
-                    117,
-                    108,
-                    0,
-                    1,
-                    5,
-                    100,
-                    105,
-                    118,
-                    95,
-                    115,
-                    0,
-                    2,
-                    5,
-                    100,
-                    105,
-                    118,
-                    95,
-                    117,
-                    0,
-                    3,
-                    5,
-                    114,
-                    101,
-                    109,
-                    95,
-                    115,
-                    0,
-                    4,
-                    5,
-                    114,
-                    101,
-                    109,
-                    95,
-                    117,
-                    0,
-                    5,
-                    8,
-                    103,
-                    101,
-                    116,
-                    95,
-                    104,
-                    105,
-                    103,
-                    104,
-                    0,
-                    0,
-                    10,
-                    191,
-                    1,
-                    6,
-                    4,
-                    0,
-                    35,
-                    0,
-                    11,
-                    36,
-                    1,
-                    1,
-                    126,
-                    32,
-                    0,
-                    173,
-                    32,
-                    1,
-                    173,
-                    66,
-                    32,
-                    134,
-                    132,
-                    32,
-                    2,
-                    173,
-                    32,
-                    3,
-                    173,
-                    66,
-                    32,
-                    134,
-                    132,
-                    126,
-                    34,
-                    4,
-                    66,
-                    32,
-                    135,
-                    167,
-                    36,
-                    0,
-                    32,
-                    4,
-                    167,
-                    11,
-                    36,
-                    1,
-                    1,
-                    126,
-                    32,
-                    0,
-                    173,
-                    32,
-                    1,
-                    173,
-                    66,
-                    32,
-                    134,
-                    132,
-                    32,
-                    2,
-                    173,
-                    32,
-                    3,
-                    173,
-                    66,
-                    32,
-                    134,
-                    132,
-                    127,
-                    34,
-                    4,
-                    66,
-                    32,
-                    135,
-                    167,
-                    36,
-                    0,
-                    32,
-                    4,
-                    167,
-                    11,
-                    36,
-                    1,
-                    1,
-                    126,
-                    32,
-                    0,
-                    173,
-                    32,
-                    1,
-                    173,
-                    66,
-                    32,
-                    134,
-                    132,
-                    32,
-                    2,
-                    173,
-                    32,
-                    3,
-                    173,
-                    66,
-                    32,
-                    134,
-                    132,
-                    128,
-                    34,
-                    4,
-                    66,
-                    32,
-                    135,
-                    167,
-                    36,
-                    0,
-                    32,
-                    4,
-                    167,
-                    11,
-                    36,
-                    1,
-                    1,
-                    126,
-                    32,
-                    0,
-                    173,
-                    32,
-                    1,
-                    173,
-                    66,
-                    32,
-                    134,
-                    132,
-                    32,
-                    2,
-                    173,
-                    32,
-                    3,
-                    173,
-                    66,
-                    32,
-                    134,
-                    132,
-                    129,
-                    34,
-                    4,
-                    66,
-                    32,
-                    135,
-                    167,
-                    36,
-                    0,
-                    32,
-                    4,
-                    167,
-                    11,
-                    36,
-                    1,
-                    1,
-                    126,
-                    32,
-                    0,
-                    173,
-                    32,
-                    1,
-                    173,
-                    66,
-                    32,
-                    134,
-                    132,
-                    32,
-                    2,
-                    173,
-                    32,
-                    3,
-                    173,
-                    66,
-                    32,
-                    134,
-                    132,
-                    130,
-                    34,
-                    4,
-                    66,
-                    32,
-                    135,
-                    167,
-                    36,
-                    0,
-                    32,
-                    4,
-                    167,
-                    11,
+                    0, 97, 115, 109, 1, 0, 0, 0, 1, 13, 2, 96, 0, 1, 127, 96, 4, 127, 127, 127, 127,
+                    1, 127, 3, 7, 6, 0, 1, 1, 1, 1, 1, 6, 6, 1, 127, 1, 65, 0, 11, 7, 50, 6, 3, 109,
+                    117, 108, 0, 1, 5, 100, 105, 118, 95, 115, 0, 2, 5, 100, 105, 118, 95, 117, 0,
+                    3, 5, 114, 101, 109, 95, 115, 0, 4, 5, 114, 101, 109, 95, 117, 0, 5, 8, 103,
+                    101, 116, 95, 104, 105, 103, 104, 0, 0, 10, 191, 1, 6, 4, 0, 35, 0, 11, 36, 1,
+                    1, 126, 32, 0, 173, 32, 1, 173, 66, 32, 134, 132, 32, 2, 173, 32, 3, 173, 66,
+                    32, 134, 132, 126, 34, 4, 66, 32, 135, 167, 36, 0, 32, 4, 167, 11, 36, 1, 1,
+                    126, 32, 0, 173, 32, 1, 173, 66, 32, 134, 132, 32, 2, 173, 32, 3, 173, 66, 32,
+                    134, 132, 127, 34, 4, 66, 32, 135, 167, 36, 0, 32, 4, 167, 11, 36, 1, 1, 126,
+                    32, 0, 173, 32, 1, 173, 66, 32, 134, 132, 32, 2, 173, 32, 3, 173, 66, 32, 134,
+                    132, 128, 34, 4, 66, 32, 135, 167, 36, 0, 32, 4, 167, 11, 36, 1, 1, 126, 32, 0,
+                    173, 32, 1, 173, 66, 32, 134, 132, 32, 2, 173, 32, 3, 173, 66, 32, 134, 132,
+                    129, 34, 4, 66, 32, 135, 167, 36, 0, 32, 4, 167, 11, 36, 1, 1, 126, 32, 0, 173,
+                    32, 1, 173, 66, 32, 134, 132, 32, 2, 173, 32, 3, 173, 66, 32, 134, 132, 130, 34,
+                    4, 66, 32, 135, 167, 36, 0, 32, 4, 167, 11,
                   ]),
                 ),
                 {},
@@ -55392,9 +55164,8 @@ PERFORMANCE OF THIS SOFTWARE.
                 // pair in the data storage. Since data moves have net zero effect (we
                 // always remove the data from the old backend), we have to cancel them out
                 // when detecting memory leaks.
-                var numMoves = this.state.numDataMovesStack[
-                  this.state.numDataMovesStack.length - 1
-                ];
+                var numMoves =
+                  this.state.numDataMovesStack[this.state.numDataMovesStack.length - 1];
                 var dataIdsLeaked =
                   numDataIdsAfter - numDataIdsBefore - numOutputDataIds - numMoves;
                 if (dataIdsLeaked > 0) {
@@ -55434,8 +55205,8 @@ PERFORMANCE OF THIS SOFTWARE.
                 var kernelOrScopeName = isRegisteredKernelInvocation(kernelParams)
                   ? kernelParams.kernelName
                   : this.state.activeScope != null
-                  ? this.state.activeScope.name
-                  : '';
+                    ? this.state.activeScope.name
+                    : '';
                 // Create the kernelFunc from either a registered kernel OR passed in
                 // forward/backward functions (used by custom grad). In this context a
                 // kernelFunc wraps a kernel implementation with some bookkeeping.
@@ -59476,8 +59247,7 @@ PERFORMANCE OF THIS SOFTWARE.
                             accumulator.push(i);
                           }
                           return accumulator;
-                        },
-                        []);
+                        }, []);
                         fetchUrls = [];
                         groupIndicesToFetch.forEach(function (i) {
                           manifest[i].paths.forEach(function (filepath) {
@@ -70270,12 +70040,12 @@ PERFORMANCE OF THIS SOFTWARE.
               typeof globalThis !== 'undefined'
                 ? globalThis
                 : typeof window !== 'undefined'
-                ? window
-                : typeof global !== 'undefined'
-                ? global
-                : typeof self !== 'undefined'
-                ? self
-                : {};
+                  ? window
+                  : typeof global !== 'undefined'
+                    ? global
+                    : typeof self !== 'undefined'
+                      ? self
+                      : {};
 
             function createCommonjsModule(fn, module) {
               return (module = { exports: {} }), fn(module, module.exports), module.exports;
@@ -71095,7 +70865,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                       // prng directly.
                       else return prng;
                     }
-                  )(prng, shortseed, 'global' in options ? options.global : this == math, options.state);
+                  )(
+                    prng,
+                    shortseed,
+                    'global' in options ? options.global : this == math,
+                    options.state,
+                  );
                 }
                 math['seed' + rngname] = seedrandom;
 
@@ -82128,24 +81903,24 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             exports.whereAsync = whereAsync;
             exports.zeros = zeros;
             exports.zerosLike = zerosLike;
-          }.call(this));
-        }.call(
+          }).call(this);
+        }).call(
           this,
           require('_process'),
           typeof global !== 'undefined'
             ? global
             : typeof self !== 'undefined'
-            ? self
-            : typeof window !== 'undefined'
-            ? window
-            : {},
+              ? self
+              : typeof window !== 'undefined'
+                ? window
+                : {},
           require('buffer').Buffer,
           arguments[3],
           arguments[4],
           arguments[5],
           arguments[6],
           require('timers').setImmediate,
-        ));
+        );
       },
       { '_process': 40, 'buffer': 38, 'crypto': 37, 'node-fetch': 37, 'timers': 49, 'util': 37 },
     ],
@@ -84134,8 +83909,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
               // For IE11 support
               return obj !== obj; // eslint-disable-line no-self-compare
             }
-          }.call(this));
-        }.call(this, require('buffer').Buffer));
+          }).call(this);
+        }).call(this, require('buffer').Buffer);
       },
       { 'base64-js': 36, 'buffer': 38, 'ieee754': 39 },
     ],
@@ -85571,8 +85346,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 : function (id) {
                     delete immediateIds[id];
                   };
-          }.call(this));
-        }.call(this, require('timers').setImmediate, require('timers').clearImmediate));
+          }).call(this);
+        }).call(this, require('timers').setImmediate, require('timers').clearImmediate);
       },
       { 'process/browser.js': 40, 'timers': 49 },
     ],
