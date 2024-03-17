@@ -28,6 +28,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
       inhand: '',
       status: 'WAITING_TO_START',
       numMoves: 0,
+      spectators: [],
     });
   }
 
@@ -572,7 +573,8 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     if (this.state.status === 'OVER') {
       return;
     }
-    const removePlayer = (playerID: string): ShogiColor => {
+
+    const removePlayer = (playerID: string): ShogiColor | 'spectator' => {
       if (this.state.black === playerID) {
         this.state = {
           ...this.state,
@@ -589,25 +591,28 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
         };
         return 'white';
       }
+      const filteredSpectators = this.state.spectators.filter(spectator => spectator !== playerID);
+      if (filteredSpectators.length < this.state.spectators.length) {
+        this.state = {
+          ...this.state,
+          spectators: filteredSpectators,
+        };
+        return 'spectator';
+      }
       throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
     };
+
     const color = removePlayer(player.id);
-    switch (this.state.status) {
-      case 'WAITING_TO_START':
-      case 'WAITING_FOR_PLAYERS':
-        // no-ops: nothing needs to happen here
-        this.state.status = 'WAITING_FOR_PLAYERS';
-        break;
-      case 'IN_PROGRESS':
+    if (color !== 'spectator') {
+      if (this.state.status === 'IN_PROGRESS') {
         this.state = {
           ...this.state,
           status: 'OVER',
           winner: color === 'black' ? this.state.white : this.state.black,
         };
-        break;
-      default:
-        // This behavior can be undefined :)
+      } else {
         throw new Error(`Unexpected game status: ${this.state.status}`);
+      }
     }
   }
 
@@ -618,16 +623,18 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
    */
   public spectate(player: Player): void {
     this._spectate(player);
-    // TODO: implement spectators ... this._spectators.push(player);
   }
 
-  protected _spectate(player: Player): void {
+  private _spectate(player: Player): void {
     if (this.state.status !== 'IN_PROGRESS') {
       throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
     }
     if (this.state.black === player.id || this.state.white === player.id) {
       throw new InvalidParametersError(PLAYER_ALREADY_IN_GAME_MESSAGE);
     }
-    // TODO: add player as a spectator in the game. update the state
+    this.state = {
+      ...this.state,
+      spectators: [...this.state.spectators, player.id],
+    };
   }
 }
