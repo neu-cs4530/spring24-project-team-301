@@ -604,14 +604,20 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
 
     const color = removePlayer(player.id);
     if (color !== 'spectator') {
-      if (this.state.status === 'IN_PROGRESS') {
-        this.state = {
-          ...this.state,
-          status: 'OVER',
-          winner: color === 'black' ? this.state.white : this.state.black,
-        };
-      } else {
-        throw new Error(`Unexpected game status: ${this.state.status}`);
+      switch (this.state.status) {
+        case 'WAITING_TO_START':
+        case 'WAITING_FOR_PLAYERS':
+          this.state.status = 'WAITING_FOR_PLAYERS';
+          break;
+        case 'IN_PROGRESS':
+          this.state = {
+            ...this.state,
+            status: 'OVER',
+            winner: color === 'black' ? this.state.white : this.state.black,
+          };
+          break;
+        default:
+          throw new Error(`Unexpected game status: ${this.state.status}`);
       }
     }
   }
