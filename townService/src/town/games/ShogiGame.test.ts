@@ -600,6 +600,70 @@ describe('ShogiGame', () => {
       expect(game.state.status).toEqual('OVER');
       expect(game.state.winner).toEqual(player2.id);
     });
+
+    it('should allow for a drop move', () => {
+      const moves: GameMove<ShogiMove>[] = [
+        {
+          gameID: game.id,
+          move: {
+            from: { row: 6, col: 7 },
+            to: { row: 5, col: 7 },
+            promotion: false,
+          },
+          playerID: player1.id,
+        },
+        {
+          gameID: game.id,
+          move: {
+            from: { row: 2, col: 7 },
+            to: { row: 3, col: 7 },
+            promotion: false,
+          },
+          playerID: player2.id,
+        },
+        {
+          gameID: game.id,
+          move: {
+            from: { row: 5, col: 7 },
+            to: { row: 4, col: 7 },
+            promotion: false,
+          },
+          playerID: player1.id,
+        },
+        {
+          gameID: game.id,
+          move: {
+            from: { row: 3, col: 7 },
+            to: { row: 4, col: 7 },
+            promotion: false,
+          },
+          playerID: player2.id,
+        },
+        {
+          gameID: game.id,
+          move: {
+            from: { row: 7, col: 7 },
+            to: { row: 4, col: 7 },
+            promotion: false,
+          },
+          playerID: player1.id,
+        },
+        {
+          gameID: game.id,
+          move: {
+            from: { row: 0, col: 0 },
+            to: { row: 2, col: 7 },
+            drop: 'P',
+            promotion: false,
+          },
+          playerID: player2.id,
+        },
+      ];
+      moves.forEach(m => {
+        expect(game.state.status).toEqual('IN_PROGRESS');
+        expect(() => game.applyMove(m)).not.toThrow();
+      });
+    });
     describe('when given an invalid move request', () => {
       it('throws an error if the game is not in progress', () => {
         game = new ShogiGame();
