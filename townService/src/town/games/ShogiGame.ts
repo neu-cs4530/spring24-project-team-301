@@ -1,4 +1,3 @@
-import { timeStamp } from 'console';
 import InvalidParametersError, {
   BOARD_POSITION_NOT_VALID_MESSAGE,
   GAME_FULL_MESSAGE,
@@ -37,11 +36,6 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
    * Updates the game state to indicate that the player is ready to start the game.
    *
    * If both players are ready, the game will start.
-   *
-   * The first player (red or yellow) is determined as follows:
-   *   - If neither player was in the last game in this area (or there was no prior game), the first player is red.
-   *   - If at least one player was in the last game in this area, then the first player will be the other color from last game.
-   *   - If a player from the last game *left* the game and then joined this one, they will be treated as a new player (not given the same color by preference).   *
    *
    * @throws InvalidParametersError if the player is not in the game (PLAYER_NOT_IN_GAME_MESSAGE)
    * @throws InvalidParametersError if the game is not in the WAITING_TO_START state (GAME_NOT_STARTABLE_MESSAGE)
@@ -129,11 +123,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
   }
 
   protected validateMove(move: GameMove<ShogiMove>): boolean {
-    const {
-      move: { from, to },
-    } = move;
     const board = this._board;
-    const piece = board[from.row][from.col];
     if (this.validateMoveOnBoard(move.move, board)) {
       const simulatedBoard = this._simulateMove(move.move, board);
       const isCheck = this._isCheck(
@@ -550,6 +540,10 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
   /**
    * Applies a move to the game state
    * @param move The move to apply to the game state
+   * @throws InvalidParametersError if the game is not in progress (GAME_NOT_IN_PROGRESS_MESSAGE)
+   * @throws InvalidParametersError if the player is not in the game (PLAYER_NOT_IN_GAME_MESSAGE)
+   * @throws InvalidParametersError if it is not the player's turn (MOVE_NOT_YOUR_TURN_MESSAGE)
+   * @throws InvalidParametersError if the move is not valid (BOARD_POSITION_NOT_VALID_MESSAGE)
    */
   public applyMove(move: GameMove<ShogiMove>): void {
     if (this.state.status !== 'IN_PROGRESS') {
