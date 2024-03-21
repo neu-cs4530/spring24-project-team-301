@@ -21,8 +21,6 @@ import {
 } from '../../lib/InvalidParametersError';
 
 class TestingGame extends Game<ShogiGameState, ShogiMove> {
-  private _spectators: Player[] = [];
-
   public constructor(priorGame?: ShogiGame) {
     super({
       status: 'WAITING_TO_START',
@@ -31,11 +29,6 @@ class TestingGame extends Game<ShogiGameState, ShogiMove> {
       numMoves: 0,
       spectators: [],
     });
-  }
-
-  public spectate(player: Player): void {
-    this._spectate(player);
-    this._spectators.push(player);
   }
 
   public applyMove(move: GameMove<ShogiMove>): void {}
@@ -57,14 +50,6 @@ class TestingGame extends Game<ShogiGameState, ShogiMove> {
     if (this.state.black) this.state.white = player.id;
     else this.state.black = player.id;
     this._players.push(player);
-  }
-
-  protected _spectate(player: Player): void {
-    // check this **
-    this.state = {
-      ...this.state,
-      spectators: [...this.state.spectators, player.id],
-    };
   }
 
   protected _leave(player: Player): void {}
@@ -100,10 +85,6 @@ describe('ShogiGameArea', () => {
     interactableUpdateSpy = jest.spyOn(gameArea, '_emitAreaChanged');
   });
   describe('JoinGame command', () => {
-    // in game -> cant join
-    // spectating -> cant join ?
-    // not WAITING_FOR_PLAYERS -> cant join
-    // not in game + WAITING_FOR_PLAYERS -> can join
     test('when there is no existing game, it should create a new game and call _emitAreaChanged', () => {
       expect(gameArea.game).toBeUndefined();
       const { gameID } = gameArea.handleCommand({ type: 'JoinGame' }, black);
@@ -162,8 +143,6 @@ describe('ShogiGameArea', () => {
     });
   });
   describe('StartGame command', () => {
-    // game WAITING_TO_START -> can start
-    // else -> cant start
     it('when there is no game, it should throw an error and not call _emitAreaChanged', () => {
       expect(() =>
         gameArea.handleCommand({ type: 'StartGame', gameID: nanoid() }, black),
@@ -204,10 +183,6 @@ describe('ShogiGameArea', () => {
     });
   });
   describe('GameMove command', () => {
-    // IN_PROGRESS + in turn -> can move
-    // not IN_PROGRESS -> cant move
-    // not in turn -> cant move
-    // valid/invalid move
     it('should throw an error if there is no game in progress and not call _emitAreaChanged', () => {
       interactableUpdateSpy.mockClear();
 
@@ -317,12 +292,6 @@ describe('ShogiGameArea', () => {
     });
   });
   describe('LeaveGame command', () => {
-    // playing game -> can leave
-    // ...check forfeit effect if IN_PROGRESS
-    // spectating gane -> can leave
-    test('TODO: leaving as a spectator', () => {
-      expect(true).toBe(true);
-    });
     it('should throw an error if there is no game in progress and not call _emitAreaChanged', () => {
       expect(() =>
         gameArea.handleCommand({ type: 'LeaveGame', gameID: nanoid() }, black),
