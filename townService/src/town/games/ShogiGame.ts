@@ -22,6 +22,8 @@ import Game from './Game';
  * A ShogiGame is a Game that implements the rules of Shogi.
  */
 export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
+  protected _spectators: Player[] = [];
+
   public constructor() {
     super({
       sfen: 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL',
@@ -574,7 +576,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
       return;
     }
 
-    const removePlayer = (playerID: string): ShogiColor | 'spectator' => {
+    const removePlayer = (playerID: string): ShogiColor => {
       if (this.state.black === playerID) {
         this.state = {
           ...this.state,
@@ -591,34 +593,50 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
         };
         return 'white';
       }
-      const filteredSpectators = this.state.spectators.filter(spectator => spectator !== playerID);
-      if (filteredSpectators.length < this.state.spectators.length) {
-        this.state = {
-          ...this.state,
-          spectators: filteredSpectators,
-        };
-        return 'spectator';
-      }
       throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
     };
 
     const color = removePlayer(player.id);
-    if (color !== 'spectator') {
-      switch (this.state.status) {
-        case 'WAITING_TO_START':
-        case 'WAITING_FOR_PLAYERS':
-          this.state.status = 'WAITING_FOR_PLAYERS';
-          break;
-        case 'IN_PROGRESS':
-          this.state = {
-            ...this.state,
-            status: 'OVER',
-            winner: color === 'black' ? this.state.white : this.state.black,
-          };
-          break;
-        default:
-          throw new Error(`Unexpected game status: ${this.state.status}`);
-      }
+    switch (this.state.status) {
+      case 'WAITING_TO_START':
+      case 'WAITING_FOR_PLAYERS':
+        this.state.status = 'WAITING_FOR_PLAYERS';
+        break;
+      case 'IN_PROGRESS':
+        this.state = {
+          ...this.state,
+          status: 'OVER',
+          winner: color === 'black' ? this.state.white : this.state.black,
+        };
+        break;
+      default:
+        throw new Error(`Unexpected game status: ${this.state.status}`);
+    }
+  }
+
+  /**
+   * Attempt to leave spectating game.
+   * @param player The player to leave spectating.
+   * @throws InvalidParametersError if the player can not leave spectating
+   */
+  public leaveSpectate(player: Player): void {
+    this._leaveSpectate(player);
+    this._spectators = this._spectators.filter(s => s.id !== player.id);
+  }
+
+  private _leaveSpectate(player: Player): void {
+    if (this.state.status === 'OVER') {
+      return;
+    }
+
+    const filteredSpectators = this.state.spectators.filter(spectator => spectator !== player.id);
+    if (filteredSpectators.length < this.state.spectators.length) {
+      this.state = {
+        ...this.state,
+        spectators: filteredSpectators,
+      };
+    } else {
+      throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
     }
   }
 
@@ -629,18 +647,27 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
    */
   public spectate(player: Player): void {
     this._spectate(player);
+    this._spectators.push(player);
   }
 
   private _spectate(player: Player): void {
     if (this.state.status !== 'IN_PROGRESS') {
       throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
     }
-    if (this.state.black === player.id || this.state.white === player.id) {
+    if (
+      this.state.black === player.id ||
+      this.state.white === player.id ||
+      this.spectators.some(s => s.id === player.id)
+    ) {
       throw new InvalidParametersError(PLAYER_ALREADY_IN_GAME_MESSAGE);
     }
     this.state = {
       ...this.state,
       spectators: [...this.state.spectators, player.id],
     };
+  }
+
+  public get spectators() {
+    return this._spectators;
   }
 }
