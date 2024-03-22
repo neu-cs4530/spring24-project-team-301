@@ -165,8 +165,8 @@ export default function ConnectFourArea({
     <>
       {gameStatusText}
       <List aria-label='list of players in the game'>
-        <ListItem>Red: {black?.userName || '(No player yet!)'}</ListItem>
-        <ListItem>Yellow: {white?.userName || '(No player yet!)'}</ListItem>
+        <ListItem>Black: {black?.userName || '(No player yet!)'}</ListItem>
+        <ListItem>White: {white?.userName || '(No player yet!)'}</ListItem>
       </List>
       <ShogiBoard gameAreaController={gameAreaController} />
     </>

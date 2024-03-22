@@ -11,8 +11,8 @@ export type ShogiGameProps = {
 const StyledShogiBoard = chakra(Container, {
   baseStyle: {
     display: 'flex',
-    width: '350px',
-    height: '350px',
+    width: '400px',
+    height: '400px',
     padding: '5px',
     flexWrap: 'wrap',
   },
@@ -20,10 +20,11 @@ const StyledShogiBoard = chakra(Container, {
 const StyledShogiSquare = chakra(Button, {
   baseStyle: {
     justifyContent: 'center',
+    width: '40px',
+    height: '40px',
     alignItems: 'center',
-    flexBasis: '14%',
+    flexBasis: 'auto',
     border: '1px solid black',
-    height: '14%',
     fontSize: '50px',
     _disabled: {
       opacity: '100%',
