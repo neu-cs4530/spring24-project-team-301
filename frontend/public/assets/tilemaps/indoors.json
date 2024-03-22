@@ -1562,12 +1562,12 @@
         {
           "height": 83.8442547785938,
           "id": 43,
-          "name": "Connect Four 2",
+          "name": "Shogi",
           "properties": [
             {
               "name": "type",
               "type": "string",
-              "value": "ConnectFour"
+              "value": "Shogi"
             }
           ],
           "rotation": 0,

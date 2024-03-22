@@ -11,8 +11,8 @@ export type ShogiGameProps = {
 const StyledShogiBoard = chakra(Container, {
   baseStyle: {
     display: 'flex',
-    width: '350px',
-    height: '350px',
+    width: '400px',
+    height: '400px',
     padding: '5px',
     flexWrap: 'wrap',
   },
