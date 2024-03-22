@@ -1,4 +1,3 @@
-import { timeStamp } from 'console';
 import InvalidParametersError, {
   BOARD_POSITION_NOT_VALID_MESSAGE,
   GAME_FULL_MESSAGE,
@@ -40,11 +39,6 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
    * Updates the game state to indicate that the player is ready to start the game.
    *
    * If both players are ready, the game will start.
-   *
-   * The first player (red or yellow) is determined as follows:
-   *   - If neither player was in the last game in this area (or there was no prior game), the first player is red.
-   *   - If at least one player was in the last game in this area, then the first player will be the other color from last game.
-   *   - If a player from the last game *left* the game and then joined this one, they will be treated as a new player (not given the same color by preference).   *
    *
    * @throws InvalidParametersError if the player is not in the game (PLAYER_NOT_IN_GAME_MESSAGE)
    * @throws InvalidParametersError if the game is not in the WAITING_TO_START state (GAME_NOT_STARTABLE_MESSAGE)
@@ -132,13 +126,9 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
   }
 
   protected validateMove(move: GameMove<ShogiMove>): boolean {
-    const {
-      move: { from, to },
-    } = move;
     const board = this._board;
-    const piece = board[from.row][from.col];
     if (this.validateMoveOnBoard(move.move, board)) {
-      const simulatedBoard = this._simulateMove(board, from, to, piece);
+      const simulatedBoard = this._simulateMove(move.move, board);
       const isCheck = this._isCheck(
         simulatedBoard,
         move.playerID === this.state.black ? 'white' : 'black',
@@ -154,22 +144,21 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     return false;
   }
 
-  private _simulateMove(
-    board: string[][],
-    from: { row: number; col: number },
-    to: { row: number; col: number },
-    piece: string,
-  ): string[][] {
+  private _simulateMove(move: ShogiMove, board: string[][]): string[][] {
+    const { from, to, drop } = move;
+    const piece = drop || this._board[from.row][from.col];
     // Create a copy of the board to simulate the move
     const simulatedBoard = [...board];
-    // Simulate the move
-    simulatedBoard[from.row][from.col] = ' ';
+    // Simulate the move, only need to change from if not a drop move
+    if (!drop) {
+      simulatedBoard[from.row][from.col] = ' ';
+    }
     simulatedBoard[to.row][to.col] = piece;
     return simulatedBoard;
   }
 
   protected validateMoveOnBoard(move: ShogiMove, board: string[][]): boolean {
-    const { from, to, promotion } = move;
+    const { from, to, promotion, drop } = move;
     const piece = board[from.row][from.col];
     if (
       board[to.row][to.col] !== ' ' &&
@@ -179,6 +168,54 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
           board[to.row][to.col].toUpperCase() === board[to.row][to.col]))
     ) {
       return false;
+    }
+    if (drop) {
+      // needs to be in hand
+      if (this.state.inhand.indexOf(drop) === -1 || drop === 'K' || drop === 'k') {
+        return false;
+      }
+      // needs to have valid moves
+      if (drop === 'P' || drop === 'L' || drop === 'N') {
+        if (drop === 'P' && to.row < 1) {
+          return false;
+        }
+        if (drop === 'L' && to.row < 1) {
+          return false;
+        }
+        if (drop === 'N' && to.row < 2) {
+          return false;
+        }
+      }
+      if (drop === 'p' || drop === 'l' || drop === 'n') {
+        if (drop === 'p' && to.row > 7) {
+          return false;
+        }
+        if (drop === 'l' && to.row > 7) {
+          return false;
+        }
+        if (drop === 'n' && to.row > 6) {
+          return false;
+        }
+      }
+      if (board[to.row][to.col] !== ' ') {
+        return false;
+      }
+      // two pawn rule in drop moves
+      if (drop === 'P') {
+        for (let i = 0; i < 9; i++) {
+          if (board[i][to.col] === 'P') {
+            return false;
+          }
+        }
+      }
+      if (drop === 'p') {
+        for (let i = 0; i < 9; i++) {
+          if (board[i][to.col] === 'p') {
+            return false;
+          }
+        }
+      }
+      return true;
     }
     if (promotion) {
       if (
@@ -506,6 +543,10 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
   /**
    * Applies a move to the game state
    * @param move The move to apply to the game state
+   * @throws InvalidParametersError if the game is not in progress (GAME_NOT_IN_PROGRESS_MESSAGE)
+   * @throws InvalidParametersError if the player is not in the game (PLAYER_NOT_IN_GAME_MESSAGE)
+   * @throws InvalidParametersError if it is not the player's turn (MOVE_NOT_YOUR_TURN_MESSAGE)
+   * @throws InvalidParametersError if the move is not valid (BOARD_POSITION_NOT_VALID_MESSAGE)
    */
   public applyMove(move: GameMove<ShogiMove>): void {
     if (this.state.status !== 'IN_PROGRESS') {
@@ -523,6 +564,13 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     if (this.validateMove(move)) {
       const board = this._board;
       const piece = board[from.row][from.col];
+      if (board[to.row][to.col] !== ' ') {
+        const inhand = this.state.inhand + board[to.row][to.col];
+        this.state = {
+          ...this.state,
+          inhand,
+        };
+      }
       board[from.row][from.col] = ' ';
       board[to.row][to.col] = promotion ? `+${piece}` : piece;
       this.state = {
@@ -534,6 +582,13 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
         this._isCheck(board, this.state.numMoves % 2 === 0 ? 'white' : 'black') &&
         this._isKingInCheckmate(this.state.numMoves % 2 === 0 ? 'black' : 'white')
       ) {
+        // drop pawn mate rule
+        // a pawn cannot be dropped for checkmate
+        if (move.move.drop === 'P' || move.move.drop === 'p') {
+          throw new InvalidParametersError(
+            BOARD_POSITION_NOT_VALID_MESSAGE + this._board[from.row][from.col],
+          );
+        }
         this.state = {
           ...this.state,
           status: 'OVER',

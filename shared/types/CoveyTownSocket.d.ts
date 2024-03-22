@@ -145,6 +145,7 @@ export interface ShogiPosition {
 export interface ShogiMove {
   from: ShogiPosition;
   to: ShogiPosition;
+  drop?: ShogiPiece;
 
   promotion?: boolean;
 }
