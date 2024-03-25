@@ -307,11 +307,11 @@ export default function TownSelection(): JSX.Element {
                 onChange={event => setPassword(event.target.value)}
               />
             </FormControl>
-            <div style='margin-left: auto; margin-right: auto;'>
-              <Button style='margin-right:20px;' onClick={handleSignIn}>
+            <div style={{ marginLeft: 'auto', marginRight: 'auto' }}>
+              <Button style={{ marginRight: 20 }} onClick={handleSignIn}>
                 Sign In
               </Button>
-              <Button style='margin-left:20px;' onClick={handleCreateAccount}>
+              <Button style={{ marginLeft: 20 }} onClick={handleCreateAccount}>
                 Create Account
               </Button>
             </div>
