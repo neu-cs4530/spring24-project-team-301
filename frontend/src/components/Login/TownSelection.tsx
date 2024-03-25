@@ -285,7 +285,7 @@ export default function TownSelection(): JSX.Element {
         <Stack>
           <Box p='4' borderWidth='1px' borderRadius='lg'>
             <Heading as='h2' size='lg'>
-              Email
+              Account
             </Heading>
             <FormControl>
               <FormLabel htmlFor='password'>Email</FormLabel>
@@ -307,8 +307,14 @@ export default function TownSelection(): JSX.Element {
                 onChange={event => setPassword(event.target.value)}
               />
             </FormControl>
-            <Button onClick={handleSignIn}>Sign In</Button>
-            <Button onClick={handleCreateAccount}>Create Account</Button>
+            <div style='margin-left: auto; margin-right: auto;'>
+              <Button style='margin-right:20px;' onClick={handleSignIn}>
+                Sign In
+              </Button>
+              <Button style='margin-left:20px;' onClick={handleCreateAccount}>
+                Create Account
+              </Button>
+            </div>
           </Box>
           <Box borderWidth='1px' borderRadius='lg'>
             <Heading p='4' as='h2' size='lg'>
