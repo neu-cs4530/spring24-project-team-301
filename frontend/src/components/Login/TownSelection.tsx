@@ -26,6 +26,7 @@ import TownController from '../../classes/TownController';
 import useVideoContext from '../VideoCall/VideoFrontend/hooks/useVideoContext/useVideoContext';
 import { auth } from '../../firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { FirebaseError } from 'firebase/auth';
 
 export default function TownSelection(): JSX.Element {
   const [email, setEmail] = useState<string>('');
@@ -51,9 +52,38 @@ export default function TownSelection(): JSX.Element {
         isClosable: true,
       });
     } catch (error) {
+      // toast({
+      //   title: 'Error',
+      //   description: 'Sign in failed',
+      //   status: 'error',
+      //   duration: 5000,
+      //   isClosable: true,
+      // });
+      const fireError = error as FirebaseError;
+      let errorMessage = 'Sign in failed. Please try again.';
+      // Customize the error message based on error.code
+      switch (fireError.code) {
+        case 'auth/invalid-email':
+          errorMessage = 'The email address is badly formatted.';
+          break;
+        case 'auth/user-disabled':
+          errorMessage = 'The user account has been disabled.';
+          break;
+        case 'auth/user-not-found':
+          errorMessage =
+            'There is no user record corresponding to this identifier. The user may have been deleted.';
+          break;
+        case 'auth/wrong-password':
+          errorMessage = 'The password is invalid or the user does not have a password.';
+          break;
+        // Add more cases as needed
+        default:
+          // other; generic error message
+          break;
+      }
       toast({
         title: 'Error',
-        description: 'Sign in failed',
+        description: errorMessage,
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -71,9 +101,34 @@ export default function TownSelection(): JSX.Element {
         isClosable: true,
       });
     } catch (error) {
+      // toast({
+      //   title: 'Error',
+      //   description: 'Account creation failed',
+      //   status: 'error',
+      //   duration: 5000,
+      //   isClosable: true,
+      // });
+      const fireError = error as FirebaseError;
+      let errorMessage = 'Account creation failed. Please try again.';
+      // Customize the error message based on error.code
+      switch (fireError.code) {
+        case 'auth/email-already-in-use':
+          errorMessage = 'The email address is already in use by another account.';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'The email address is badly formatted.';
+          break;
+        case 'auth/weak-password':
+          errorMessage = 'The password is too weak. Please choose a stronger password.';
+          break;
+        // Add more cases as needed
+        default:
+          // Keep the generic error message for other errors
+          break;
+      }
       toast({
         title: 'Error',
-        description: 'Account creation failed',
+        description: errorMessage,
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -307,13 +362,9 @@ export default function TownSelection(): JSX.Element {
                 onChange={event => setPassword(event.target.value)}
               />
             </FormControl>
-            <div style={{ marginLeft: 'auto', marginRight: 'auto' }}>
-              <Button style={{ marginRight: 20 }} onClick={handleSignIn}>
-                Sign In
-              </Button>
-              <Button style={{ marginLeft: 20 }} onClick={handleCreateAccount}>
-                Create Account
-              </Button>
+            <div>
+              <Button onClick={handleSignIn}>Sign In</Button>
+              <Button onClick={handleCreateAccount}>Create Account</Button>
             </div>
           </Box>
           <Box borderWidth='1px' borderRadius='lg'>
