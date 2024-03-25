@@ -24,8 +24,7 @@ import { Town } from '../../generated/client';
 import useLoginController from '../../hooks/useLoginController';
 import TownController from '../../classes/TownController';
 import useVideoContext from '../VideoCall/VideoFrontend/hooks/useVideoContext/useVideoContext';
-import { auth } from '../../../../firebase';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { auth, signUp, signIn } from '../../../../firebase';
 
 export default function TownSelection(): JSX.Element {
   const [email, setEmail] = useState<string>('');
@@ -43,7 +42,7 @@ export default function TownSelection(): JSX.Element {
 
   const handleSignIn = useCallback(async () => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await signIn(email, password);
       toast({
         title: 'Sign in successful!',
         status: 'success',
@@ -63,7 +62,7 @@ export default function TownSelection(): JSX.Element {
 
   const handleCreateAccount = useCallback(async () => {
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      await signUp(email, password);
       toast({
         title: 'Account created successfully!',
         status: 'success',
@@ -177,7 +176,7 @@ export default function TownSelection(): JSX.Element {
         }
       }
     },
-    [setTownController, email, password, toast, videoConnect, loginController],
+    [setTownController, email, toast, videoConnect, loginController],
   );
 
   const handleCreate = async () => {
