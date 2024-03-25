@@ -639,6 +639,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
             );
           }
         });
+        // set _userID from firebase
         this._userID = initialData.userID;
         this._ourPlayer = this.players.find(eachPlayer => eachPlayer.id == this.userID);
         this.emit('connect', initialData.providerVideoToken);

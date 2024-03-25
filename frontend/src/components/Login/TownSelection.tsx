@@ -24,9 +24,12 @@ import { Town } from '../../generated/client';
 import useLoginController from '../../hooks/useLoginController';
 import TownController from '../../classes/TownController';
 import useVideoContext from '../VideoCall/VideoFrontend/hooks/useVideoContext/useVideoContext';
+import { auth } from '../../../../firebase';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 
 export default function TownSelection(): JSX.Element {
-  const [userName, setUserName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [newTownName, setNewTownName] = useState<string>('');
   const [newTownIsPublic, setNewTownIsPublic] = useState<boolean>(true);
   const [townIDToJoin, setTownIDToJoin] = useState<string>('');
@@ -37,6 +40,46 @@ export default function TownSelection(): JSX.Element {
   const { connect: videoConnect } = useVideoContext();
 
   const toast = useToast();
+
+  const handleSignIn = useCallback(async () => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      toast({
+        title: 'Sign in successful!',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Sign in failed',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  }, [email, password, toast]);
+
+  const handleCreateAccount = useCallback(async () => {
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      toast({
+        title: 'Account created successfully!',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Account creation failed',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  }, [email, password, toast]);
 
   const updateTownListings = useCallback(() => {
     townsService.listTowns().then(towns => {
@@ -55,11 +98,12 @@ export default function TownSelection(): JSX.Element {
     async (coveyRoomID: string) => {
       let connectWatchdog: NodeJS.Timeout | undefined = undefined;
       let loadingToast: ToastId | undefined = undefined;
+      const user = auth.currentUser;
       try {
-        if (!userName || userName.length === 0) {
+        if (!user) {
           toast({
             title: 'Unable to join town',
-            description: 'Please select a username',
+            description: 'Please sign in before joining a town',
             status: 'error',
           });
           return;
@@ -96,7 +140,7 @@ export default function TownSelection(): JSX.Element {
         }, 1000);
         setIsJoining(true);
         const newController = new TownController({
-          userName,
+          userName: email,
           townID: coveyRoomID,
           loginController,
         });
@@ -133,14 +177,15 @@ export default function TownSelection(): JSX.Element {
         }
       }
     },
-    [setTownController, userName, toast, videoConnect, loginController],
+    [setTownController, email, password, toast, videoConnect, loginController],
   );
 
   const handleCreate = async () => {
-    if (!userName || userName.length === 0) {
+    const user = auth.currentUser;
+    if (!user) {
       toast({
         title: 'Unable to create town',
-        description: 'Please select a username before creating a town',
+        description: 'Please sign in before creating a town',
         status: 'error',
       });
       return;
@@ -240,19 +285,30 @@ export default function TownSelection(): JSX.Element {
         <Stack>
           <Box p='4' borderWidth='1px' borderRadius='lg'>
             <Heading as='h2' size='lg'>
-              Select a username
+              Email
             </Heading>
-
+            <FormControl>
+              <FormLabel htmlFor='password'>Email</FormLabel>
+              <Input
+                autoFocus
+                name='email'
+                placeholder='Email'
+                value={email}
+                onChange={event => setEmail(event.target.value)}
+              />
+            </FormControl>
             <FormControl>
               <FormLabel htmlFor='name'>Name</FormLabel>
               <Input
                 autoFocus
-                name='name'
-                placeholder='Your name'
-                value={userName}
-                onChange={event => setUserName(event.target.value)}
+                name='password'
+                placeholder='Password'
+                value={password}
+                onChange={event => setPassword(event.target.value)}
               />
             </FormControl>
+            <Button onClick={handleSignIn}>Sign In</Button>
+            <Button onClick={handleCreateAccount}>Create Account</Button>
           </Box>
           <Box borderWidth='1px' borderRadius='lg'>
             <Heading p='4' as='h2' size='lg'>
