@@ -31,7 +31,7 @@ export default class Player {
       rotation: 'front',
     };
     this._userName = userName;
-    this._id = nanoid(); // TODO: use the firebase user id (auth.currentUser.uid)
+    this._id = nanoid();
     this._sessionToken = nanoid();
     this.townEmitter = townEmitter;
   }

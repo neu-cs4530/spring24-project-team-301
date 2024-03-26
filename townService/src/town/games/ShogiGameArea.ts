@@ -1,3 +1,4 @@
+import { doc, increment, setDoc } from 'firebase/firestore';
 import InvalidParametersError, {
   GAME_ID_MISSMATCH_MESSAGE,
   GAME_NOT_IN_PROGRESS_MESSAGE,
@@ -14,6 +15,7 @@ import {
 } from '../../types/CoveyTownSocket';
 import ShogiGame from './ShogiGame';
 import GameArea from './GameArea';
+import { firestore } from '../../../firebase';
 
 /**
  * The ShogiGameArea class is responsible for managing the state of a single game area for Shogi.
@@ -28,6 +30,18 @@ export default class ShogiGameArea extends GameArea<ShogiGame> {
   }
 
   private _stateUpdated(updatedState: GameInstance<ShogiGameState>) {
+    // const win = async (userName: string) => {
+    //   const playerRef = doc(firestore, 'ShogiRecords', userName);
+    //   await setDoc(playerRef, { wins: increment(1) }, { merge: true });
+    // };
+    // const lose = async (userName: string) => {
+    //   const playerRef = doc(firestore, 'ShogiRecords', userName);
+    //   await setDoc(playerRef, { losses: increment(1) }, { merge: true });
+    // };
+    // const draw = async (userName: string) => {
+    //   const playerRef = doc(firestore, 'ShogiRecords', userName);
+    //   await setDoc(playerRef, { draws: increment(1) }, { merge: true });
+    // };
     if (updatedState.state.status === 'OVER') {
       const gameID = this._game?.id;
       if (gameID && !this._history.find(eachResult => eachResult.gameID === gameID)) {
@@ -44,6 +58,19 @@ export default class ShogiGameArea extends GameArea<ShogiGame> {
               [whiteName]: updatedState.state.winner === white ? 1 : 0,
             },
           });
+          // switch (updatedState.state.winner) {
+          //   case black:
+          //     win(black);
+          //     lose(white);
+          //     break;
+          //   case white:
+          //     win(white);
+          //     lose(black);
+          //     break;
+          //   default:
+          //     draw(white);
+          //     draw(black);
+          // }
         }
       }
     }

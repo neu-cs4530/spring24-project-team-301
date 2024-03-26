@@ -24,9 +24,7 @@ import { Town } from '../../generated/client';
 import useLoginController from '../../hooks/useLoginController';
 import TownController from '../../classes/TownController';
 import useVideoContext from '../VideoCall/VideoFrontend/hooks/useVideoContext/useVideoContext';
-import { auth, firestore } from '../../firebase';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import axios from 'axios';
 
 export default function TownSelection(): JSX.Element {
   const [email, setEmail] = useState<string>('');
@@ -42,9 +40,21 @@ export default function TownSelection(): JSX.Element {
 
   const toast = useToast();
 
+  const [authenticated, setAuthenticated] = useState<boolean>(false);
+
   const handleSignIn = useCallback(async () => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const body = {
+        email: email,
+        password: password,
+      };
+      const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/login`, body);
+      console.log(res);
+      if (res.status !== 200) {
+        throw new Error('Sign in failed');
+      }
+      console.log('sign in successful');
+      setAuthenticated(true);
       toast({
         title: 'Sign in successful!',
         status: 'success',
@@ -64,24 +74,27 @@ export default function TownSelection(): JSX.Element {
 
   const handleCreateAccount = useCallback(async () => {
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const body = {
+        email: email,
+        password: password,
+      };
+      console.log('about to create account');
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/createAccount`,
+        body,
+      );
+      console.log(res);
+      if (res.status !== 200) {
+        throw new Error('Account creation failed');
+      }
+      console.log('account created');
+      setAuthenticated(true);
       toast({
         title: 'Account created successfully!',
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
-
-      // create database location to track shogi record, default w/l/d to 0
-      if (!auth.currentUser) {
-        throw new Error('User not found');
-      }
-      // const accountRef = doc(firestore, 'Records', auth.currentUser.uid);
-      // await setDoc(accountRef, {});
-      // const shogiCollectionRef = collection(accountRef, 'Shogi');
-      // await setDoc(doc(shogiCollectionRef, 'stats'), { win: 0, loss: 0, draw: 0 });
-      const accountRef = doc(firestore, 'ShogiRecords', auth.currentUser.uid);
-      await setDoc(accountRef, { win: 0, loss: 0, draw: 0 });
     } catch (error) {
       toast({
         title: 'Error',
@@ -110,9 +123,8 @@ export default function TownSelection(): JSX.Element {
     async (coveyRoomID: string) => {
       let connectWatchdog: NodeJS.Timeout | undefined = undefined;
       let loadingToast: ToastId | undefined = undefined;
-      const user = auth.currentUser;
       try {
-        if (!user) {
+        if (!authenticated) {
           toast({
             title: 'Unable to join town',
             description: 'Please sign in before joining a town',
@@ -189,12 +201,11 @@ export default function TownSelection(): JSX.Element {
         }
       }
     },
-    [setTownController, email, toast, videoConnect, loginController],
+    [authenticated, email, loginController, videoConnect, setTownController, toast],
   );
 
   const handleCreate = async () => {
-    const user = auth.currentUser;
-    if (!user) {
+    if (!authenticated) {
       toast({
         title: 'Unable to create town',
         description: 'Please sign in before creating a town',
