@@ -293,7 +293,7 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
       move,
     });
   }
-  
+
   /**
    * Sends a request to the server to get the engine move.
    * Does not check if the move is valid.
