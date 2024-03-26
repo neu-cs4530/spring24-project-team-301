@@ -310,7 +310,7 @@ export default function TownSelection(): JSX.Element {
               />
             </FormControl>
             <FormControl>
-              <FormLabel htmlFor='name'>Name</FormLabel>
+              <FormLabel htmlFor='name'>Password</FormLabel>
               <Input
                 autoFocus
                 name='password'
