@@ -1,4 +1,3 @@
-import { doc, increment, setDoc } from 'firebase/firestore';
 import InvalidParametersError, {
   GAME_ID_MISSMATCH_MESSAGE,
   GAME_NOT_IN_PROGRESS_MESSAGE,
@@ -15,7 +14,6 @@ import {
 } from '../../types/CoveyTownSocket';
 import ShogiGame from './ShogiGame';
 import GameArea from './GameArea';
-import { firestore } from '../../../firebase';
 
 /**
  * The ShogiGameArea class is responsible for managing the state of a single game area for Shogi.
@@ -58,6 +56,7 @@ export default class ShogiGameArea extends GameArea<ShogiGame> {
               [whiteName]: updatedState.state.winner === white ? 1 : 0,
             },
           });
+          // TODO: implement axios calls to update user records in firestore
           // switch (updatedState.state.winner) {
           //   case black:
           //     win(black);
