@@ -28,18 +28,6 @@ export default class ShogiGameArea extends GameArea<ShogiGame> {
   }
 
   private _stateUpdated(updatedState: GameInstance<ShogiGameState>) {
-    // const win = async (userName: string) => {
-    //   const playerRef = doc(firestore, 'ShogiRecords', userName);
-    //   await setDoc(playerRef, { wins: increment(1) }, { merge: true });
-    // };
-    // const lose = async (userName: string) => {
-    //   const playerRef = doc(firestore, 'ShogiRecords', userName);
-    //   await setDoc(playerRef, { losses: increment(1) }, { merge: true });
-    // };
-    // const draw = async (userName: string) => {
-    //   const playerRef = doc(firestore, 'ShogiRecords', userName);
-    //   await setDoc(playerRef, { draws: increment(1) }, { merge: true });
-    // };
     if (updatedState.state.status === 'OVER') {
       const gameID = this._game?.id;
       if (gameID && !this._history.find(eachResult => eachResult.gameID === gameID)) {
