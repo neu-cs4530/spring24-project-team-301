@@ -293,4 +293,14 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
       move,
     });
   }
+  public async getEngineMove(): Promise<void> {
+    const instanceID = this._instanceID;
+    if (!instanceID || this._model.game?.state.status !== 'IN_PROGRESS') {
+      throw new Error(NO_GAME_IN_PROGRESS_ERROR);
+    }
+    await this._townController.sendInteractableCommand(this.id, {
+      type: 'EngineMove',
+      gameID: instanceID,
+    });
+  }
 }

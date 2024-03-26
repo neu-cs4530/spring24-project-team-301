@@ -267,7 +267,7 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | SpectateCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<ShogiMove> | StartGameCommand | LeaveGameCommand;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | SpectateCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<ShogiMove> | EngineMoveCommand | StartGameCommand | LeaveGameCommand;
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;
@@ -284,6 +284,10 @@ export interface LeaveGameCommand {
 }
 export interface StartGameCommand {
   type: 'StartGame';
+  gameID: GameInstanceID;
+}
+export interface EngineMoveCommand {
+  type: 'EngineMove';
   gameID: GameInstanceID;
 }
 export interface GameMoveCommand<MoveType> {
