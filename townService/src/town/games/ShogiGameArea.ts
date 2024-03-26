@@ -44,6 +44,20 @@ export default class ShogiGameArea extends GameArea<ShogiGame> {
               [whiteName]: updatedState.state.winner === white ? 1 : 0,
             },
           });
+          // TODO: implement axios calls to update user records in firestore
+          // switch (updatedState.state.winner) {
+          //   case black:
+          //     win(black);
+          //     lose(white);
+          //     break;
+          //   case white:
+          //     win(white);
+          //     lose(black);
+          //     break;
+          //   default:
+          //     draw(white);
+          //     draw(black);
+          // }
         }
       }
     }

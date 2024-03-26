@@ -6,11 +6,14 @@ import swaggerUi from 'swagger-ui-express';
 import { ValidateError } from 'tsoa';
 import fs from 'fs/promises';
 import { Server as SocketServer } from 'socket.io';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 import { RegisterRoutes } from '../generated/routes';
 import TownsStore from './lib/TownsStore';
 import { ClientToServerEvents, ServerToClientEvents } from './types/CoveyTownSocket';
 import { TownsController } from './town/TownsController';
 import { logError } from './Utils';
+import { auth, firestore } from '../firebase';
 
 // Create the server instances
 const app = Express();
@@ -36,6 +39,58 @@ app.use(Express.json());
 app.use('/docs', swaggerUi.serve, async (_req: Express.Request, res: Express.Response) => {
   const swaggerSpec = await fs.readFile('../shared/generated/swagger.json', 'utf-8');
   return res.send(swaggerUi.generateHTML(JSON.parse(swaggerSpec)));
+});
+
+// sign in a user
+app.put('/login', async (_req: Express.Request, res: Express.Response) => {
+  if (_req.body.email && _req.body.password) {
+    try {
+      await signInWithEmailAndPassword(auth, _req.body.email, _req.body.password);
+      return res.status(200).send('Login successful');
+    } catch (e) {
+      return res.status(401).send('Login failed');
+    }
+  }
+  return res.status(400).send('Invalid body');
+});
+
+// create a user account, initialize firestore record 0-0-0
+app.post('/createAccount', async (_req: Express.Request, res: Express.Response) => {
+  if (_req.body.email && _req.body.password) {
+    try {
+      await createUserWithEmailAndPassword(auth, _req.body.email, _req.body.password);
+      const accountRef = doc(firestore, 'ShogiRecords', _req.body.email);
+      await setDoc(accountRef, { win: 0, loss: 0, draw: 0 });
+      return res.status(200).send('Account created');
+    } catch (e) {
+      return res.status(401).send('Account creation failed');
+    }
+  }
+  return res.status(400).send('Invalid body');
+});
+
+// user win
+app.put('/win', async (_req: Express.Request, res: Express.Response) => {
+  if (_req.body.email) {
+    const accountRef = doc(firestore, 'ShogiRecords', _req.body.email);
+    await setDoc(accountRef, { win: 1 }, { merge: true });
+  }
+});
+
+// user loss
+app.put('/loss', async (_req: Express.Request, res: Express.Response) => {
+  if (_req.body.email) {
+    const accountRef = doc(firestore, 'ShogiRecords', _req.body.email);
+    await setDoc(accountRef, { loss: 1 }, { merge: true });
+  }
+});
+
+// user draw
+app.put('/draw', async (_req: Express.Request, res: Express.Response) => {
+  if (_req.body.email) {
+    const accountRef = doc(firestore, 'ShogiRecords', _req.body.email);
+    await setDoc(accountRef, { draw: 1 }, { merge: true });
+  }
 });
 
 // Register the TownsController routes with the express server

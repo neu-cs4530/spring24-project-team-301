@@ -24,9 +24,11 @@ import { Town } from '../../generated/client';
 import useLoginController from '../../hooks/useLoginController';
 import TownController from '../../classes/TownController';
 import useVideoContext from '../VideoCall/VideoFrontend/hooks/useVideoContext/useVideoContext';
+import axios from 'axios';
 
 export default function TownSelection(): JSX.Element {
-  const [userName, setUserName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [newTownName, setNewTownName] = useState<string>('');
   const [newTownIsPublic, setNewTownIsPublic] = useState<boolean>(true);
   const [townIDToJoin, setTownIDToJoin] = useState<string>('');
@@ -37,6 +39,72 @@ export default function TownSelection(): JSX.Element {
   const { connect: videoConnect } = useVideoContext();
 
   const toast = useToast();
+
+  const [authenticated, setAuthenticated] = useState<boolean>(false);
+
+  const handleSignIn = useCallback(async () => {
+    try {
+      const body = {
+        email: email,
+        password: password,
+      };
+      const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/login`, body);
+      console.log(res);
+      if (res.status !== 200) {
+        throw new Error('Sign in failed');
+      }
+      console.log('sign in successful');
+      setAuthenticated(true);
+      toast({
+        title: 'Sign in successful!',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Sign in failed',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  }, [email, password, toast]);
+
+  const handleCreateAccount = useCallback(async () => {
+    try {
+      const body = {
+        email: email,
+        password: password,
+      };
+      console.log('about to create account');
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/createAccount`,
+        body,
+      );
+      console.log(res);
+      if (res.status !== 200) {
+        throw new Error('Account creation failed');
+      }
+      console.log('account created');
+      setAuthenticated(true);
+      toast({
+        title: 'Account created successfully!',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Account creation failed',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  }, [email, password, toast]);
 
   const updateTownListings = useCallback(() => {
     townsService.listTowns().then(towns => {
@@ -56,10 +124,10 @@ export default function TownSelection(): JSX.Element {
       let connectWatchdog: NodeJS.Timeout | undefined = undefined;
       let loadingToast: ToastId | undefined = undefined;
       try {
-        if (!userName || userName.length === 0) {
+        if (!authenticated) {
           toast({
             title: 'Unable to join town',
-            description: 'Please select a username',
+            description: 'Please sign in before joining a town',
             status: 'error',
           });
           return;
@@ -96,7 +164,7 @@ export default function TownSelection(): JSX.Element {
         }, 1000);
         setIsJoining(true);
         const newController = new TownController({
-          userName,
+          userName: email,
           townID: coveyRoomID,
           loginController,
         });
@@ -133,14 +201,14 @@ export default function TownSelection(): JSX.Element {
         }
       }
     },
-    [setTownController, userName, toast, videoConnect, loginController],
+    [authenticated, email, loginController, videoConnect, setTownController, toast],
   );
 
   const handleCreate = async () => {
-    if (!userName || userName.length === 0) {
+    if (!authenticated) {
       toast({
         title: 'Unable to create town',
-        description: 'Please select a username before creating a town',
+        description: 'Please sign in before creating a town',
         status: 'error',
       });
       return;
@@ -240,19 +308,32 @@ export default function TownSelection(): JSX.Element {
         <Stack>
           <Box p='4' borderWidth='1px' borderRadius='lg'>
             <Heading as='h2' size='lg'>
-              Select a username
+              Account
             </Heading>
-
             <FormControl>
-              <FormLabel htmlFor='name'>Name</FormLabel>
+              <FormLabel htmlFor='password'>Email</FormLabel>
               <Input
                 autoFocus
-                name='name'
-                placeholder='Your name'
-                value={userName}
-                onChange={event => setUserName(event.target.value)}
+                name='email'
+                placeholder='Email'
+                value={email}
+                onChange={event => setEmail(event.target.value)}
               />
             </FormControl>
+            <FormControl>
+              <FormLabel htmlFor='name'>Password</FormLabel>
+              <Input
+                autoFocus
+                name='password'
+                placeholder='Password'
+                value={password}
+                onChange={event => setPassword(event.target.value)}
+              />
+            </FormControl>
+            <div>
+              <Button onClick={handleSignIn}>Sign In</Button>
+              <Button onClick={handleCreateAccount}>Create Account</Button>
+            </div>
           </Box>
           <Box borderWidth='1px' borderRadius='lg'>
             <Heading p='4' as='h2' size='lg'>
