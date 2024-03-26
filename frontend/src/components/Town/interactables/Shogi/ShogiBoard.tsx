@@ -74,7 +74,7 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
             <StyledShogiSquare
               key={`${rowIndex}.${colIndex}`}
               onClick={async () => {
-                if (from.row !== -1 && !(from.row === rowIndex && from.row === colIndex)) {
+                if (from.row !== -1 && !(from.row === rowIndex && from.col === colIndex)) {
                   try {
                     await gameAreaController.makeMove(
                       from.row as ShogiIndex,
