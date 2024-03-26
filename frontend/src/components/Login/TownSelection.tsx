@@ -24,8 +24,9 @@ import { Town } from '../../generated/client';
 import useLoginController from '../../hooks/useLoginController';
 import TownController from '../../classes/TownController';
 import useVideoContext from '../VideoCall/VideoFrontend/hooks/useVideoContext/useVideoContext';
-import { auth } from '../../firebase';
+import { auth, firestore } from '../../firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 
 export default function TownSelection(): JSX.Element {
   const [email, setEmail] = useState<string>('');
@@ -70,6 +71,17 @@ export default function TownSelection(): JSX.Element {
         duration: 3000,
         isClosable: true,
       });
+
+      // create database location to track shogi record, default w/l/d to 0
+      if (!auth.currentUser) {
+        throw new Error('User not found');
+      }
+      // const accountRef = doc(firestore, 'Records', auth.currentUser.uid);
+      // await setDoc(accountRef, {});
+      // const shogiCollectionRef = collection(accountRef, 'Shogi');
+      // await setDoc(doc(shogiCollectionRef, 'stats'), { win: 0, loss: 0, draw: 0 });
+      const accountRef = doc(firestore, 'ShogiRecords', auth.currentUser.uid);
+      await setDoc(accountRef, { win: 0, loss: 0, draw: 0 });
     } catch (error) {
       toast({
         title: 'Error',
