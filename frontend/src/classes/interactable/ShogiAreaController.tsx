@@ -293,6 +293,12 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
       move,
     });
   }
+  
+  /**
+   * Sends a request to the server to get the engine move.
+   * Does not check if the move is valid.
+   * @throws an error with message NO_GAME_IN_PROGRESS_ERROR if there is no game in progress
+   */
   public async getEngineMove(): Promise<void> {
     const instanceID = this._instanceID;
     if (!instanceID || this._model.game?.state.status !== 'IN_PROGRESS') {
