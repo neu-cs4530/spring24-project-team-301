@@ -2,15 +2,18 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyAMAG5K9iJOb293fW5wvD3JU-MdfR4dkVg',
-  authDomain: 'shogi-5f965.firebaseapp.com',
-  projectId: 'shogi-5f965',
-  storageBucket: 'shogi-5f965.appspot.com',
-  messagingSenderId: '142858111231',
-  appId: '1:142858111231:web:2d9ad42a8423e59395e4ca',
-  measurementId: 'G-6DB67N8CYE',
+  apiKey: `${process.env.FIREBASE_API_KEY}`,
+  authDomain: `${process.env.FIREBASE_AUTH_DOMAIN}`,
+  projectId: `${process.env.FIREBASE_PROJECT_ID}`,
+  storageBucket: `${process.env.FIREBASE_STORAGE_BUCKET}`,
+  messagingSenderId: `${process.env.FIREBASE_MESSAGING_SENDER_ID}`,
+  appId: `${process.env.FIREBASE_APP_ID}`,
+  measurementId: `${process.env.FIREBASE_MEASUREMENT_ID}`,
 };
 
 // Initialize Firebase
