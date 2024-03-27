@@ -55,6 +55,8 @@ export default function TownSelection(): JSX.Element {
       }
       console.log('sign in successful');
       setAuthenticated(true);
+      setEmail('');
+      setPassword('');
       toast({
         title: 'Sign in successful!',
         status: 'success',
@@ -89,6 +91,8 @@ export default function TownSelection(): JSX.Element {
       }
       console.log('account created');
       setAuthenticated(true);
+      setEmail('');
+      setPassword('');
       toast({
         title: 'Account created successfully!',
         status: 'success',
@@ -326,6 +330,7 @@ export default function TownSelection(): JSX.Element {
                 autoFocus
                 name='password'
                 placeholder='Password'
+                type='password'
                 value={password}
                 onChange={event => setPassword(event.target.value)}
               />
