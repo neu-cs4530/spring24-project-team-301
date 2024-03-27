@@ -670,6 +670,31 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
   }
 
   /**
+   * Get the move for the engine to make.
+   * @returns The move for the engine to make.
+   */
+  public getEngineMove(): ShogiMove {
+    // TODO: for now returns a random move
+    const board = this._board;
+    const moves: ShogiMove[] = [];
+    for (let i = 0; i < board.length; i++) {
+      for (let j = 0; j < board[i].length; j++) {
+        const piece = board[i][j];
+        if (piece !== ' ') {
+          const move: ShogiMove = {
+            from: { row: i as ShogiIndex, col: j as ShogiIndex },
+            to: { row: 0 as ShogiIndex, col: 0 as ShogiIndex },
+          };
+          if (this.validateMoveOnBoard({ from: move.from, to: move.to } as ShogiMove, board)) {
+            moves.push(move);
+          }
+        }
+      }
+    }
+    return moves[Math.floor(Math.random() * moves.length)];
+  }
+
+  /**
    * Attempt to leave spectating game.
    * @param player The player to leave spectating.
    * @throws InvalidParametersError if the player can not leave spectating
