@@ -55,14 +55,15 @@ export default function TownSelection(): JSX.Element {
       }
       console.log('sign in successful');
       setAuthenticated(true);
-      setEmail('');
-      setPassword('');
       toast({
         title: 'Sign in successful!',
+        description: `Signed in as ${email}`,
         status: 'success',
-        duration: 3000,
+        duration: 5000,
         isClosable: true,
       });
+      setEmail('');
+      setPassword('');
     } catch (error) {
       toast({
         title: 'Error',
@@ -91,14 +92,15 @@ export default function TownSelection(): JSX.Element {
       }
       console.log('account created');
       setAuthenticated(true);
-      setEmail('');
-      setPassword('');
       toast({
         title: 'Account created successfully!',
+        description: `Signed in as ${email}`,
         status: 'success',
-        duration: 3000,
+        duration: 5000,
         isClosable: true,
       });
+      setEmail('');
+      setPassword('');
     } catch (error) {
       toast({
         title: 'Error',
