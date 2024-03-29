@@ -27,6 +27,7 @@ import useVideoContext from '../VideoCall/VideoFrontend/hooks/useVideoContext/us
 import axios from 'axios';
 
 export default function TownSelection(): JSX.Element {
+  const [userName, setUserName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [newTownName, setNewTownName] = useState<string>('');
@@ -55,14 +56,16 @@ export default function TownSelection(): JSX.Element {
       }
       console.log('sign in successful');
       setAuthenticated(true);
-      setEmail('');
-      setPassword('');
+      setUserName(email);
       toast({
         title: 'Sign in successful!',
+        description: `Signed in as ${email}`,
         status: 'success',
-        duration: 3000,
+        duration: 5000,
         isClosable: true,
       });
+      setEmail('');
+      setPassword('');
     } catch (error) {
       toast({
         title: 'Error',
@@ -91,14 +94,16 @@ export default function TownSelection(): JSX.Element {
       }
       console.log('account created');
       setAuthenticated(true);
-      setEmail('');
-      setPassword('');
+      setUserName(email);
       toast({
         title: 'Account created successfully!',
+        description: `Signed in as ${email}`,
         status: 'success',
-        duration: 3000,
+        duration: 5000,
         isClosable: true,
       });
+      setEmail('');
+      setPassword('');
     } catch (error) {
       toast({
         title: 'Error',
@@ -168,7 +173,7 @@ export default function TownSelection(): JSX.Element {
         }, 1000);
         setIsJoining(true);
         const newController = new TownController({
-          userName: email,
+          userName,
           townID: coveyRoomID,
           loginController,
         });
@@ -205,7 +210,7 @@ export default function TownSelection(): JSX.Element {
         }
       }
     },
-    [authenticated, email, loginController, videoConnect, setTownController, toast],
+    [authenticated, userName, loginController, videoConnect, setTownController, toast],
   );
 
   const handleCreate = async () => {
