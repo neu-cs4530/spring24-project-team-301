@@ -670,28 +670,136 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
   }
 
   /**
-   * Get the move for the engine to make.
-   * @returns The move for the engine to make.
+   * Gets all valid moves for a piece
+   * @param row The row of the piece
+   * @param col The column of the piece
+   * @returns All valid moves for the piece
    */
-  public getEngineMove(): ShogiMove {
-    // TODO: for now returns a random move
+  public getValidMovesForPiece(row: number, col: number): ShogiMove[] {
     const board = this._board;
-    const moves: ShogiMove[] = [];
+    const validMoves: ShogiMove[] = [];
+    for (let x = 0; x < board.length; x++) {
+      for (let y = 0; y < board[x].length; y++) {
+        const move: ShogiMove = {
+          from: { row: row as ShogiIndex, col: col as ShogiIndex },
+          to: { row: x as ShogiIndex, col: y as ShogiIndex },
+          promotion: false,
+        };
+        if (this.validateMoveOnBoard(move, board)) {
+          validMoves.push(move);
+        }
+      }
+    }
+    return validMoves;
+  }
+
+  /**
+   * Gets all valid moves
+   * @returns All valid moves for the current player
+   */
+  public getAllValidMoves(): ShogiMove[] {
+    const board = this._board;
+    const validMoves: ShogiMove[] = [];
     for (let i = 0; i < board.length; i++) {
       for (let j = 0; j < board[i].length; j++) {
         const piece = board[i][j];
         if (piece !== ' ') {
-          const move: ShogiMove = {
-            from: { row: i as ShogiIndex, col: j as ShogiIndex },
-            to: { row: 0 as ShogiIndex, col: 0 as ShogiIndex },
-          };
-          if (this.validateMoveOnBoard({ from: move.from, to: move.to } as ShogiMove, board)) {
-            moves.push(move);
+          this.getValidMovesForPiece(i, j).forEach(move => validMoves.push(move));
+        }
+      }
+    }
+    return validMoves;
+  }
+
+  /**
+   * Get the move for the engine to make.
+   * Uses the Negamax algorithm to determine the best move for the engine to make.
+   * https://en.wikipedia.org/wiki/Negamax
+   * @returns The move for the engine to make.
+   */
+  public getEngineMove(): ShogiMove {
+    const allMoves = this.getAllValidMoves();
+    const bestMove: ShogiMove = allMoves[0];
+    let bestValue = -Infinity;
+    for (const move of allMoves) {
+      const simulatedBoard = this._simulateMove(move, this._board);
+      const value = -this._negamax(simulatedBoard, 3);
+      if (value > bestValue) {
+        bestValue = value;
+        bestMove.from = move.from;
+        bestMove.to = move.to;
+        bestMove.promotion = move.promotion;
+      }
+    }
+    return bestMove;
+  }
+
+  private _negamax(board: string[][], depth: number): number {
+    if (depth === 0) return this._evaluateBoard(board);
+    let bestValue = -Infinity;
+    for (let i = 0; i < this._board.length; i++) {
+      for (let j = 0; j < this._board[i].length; j++) {
+        const piece = board[i][j];
+        if (piece !== ' ') {
+          const moves = this.getValidMovesForPiece(i, j);
+          for (const move of moves) {
+            const simulatedBoard = this._simulateMove(move, board);
+            const value = -this._negamax(simulatedBoard, depth - 1);
+            bestValue = Math.max(bestValue, value);
           }
         }
       }
     }
-    return moves[Math.floor(Math.random() * moves.length)];
+    return bestValue;
+  }
+
+  private _evaluateBoard(board: string[][]): number {
+    let score = 0;
+    for (let i = 0; i < board.length; i++) {
+      for (let j = 0; j < board[i].length; j++) {
+        const piece = board[i][j];
+        if (piece !== ' ') {
+          const pieceValue = this._pieceValue(piece);
+          score += piece === piece.toUpperCase() ? pieceValue : -pieceValue;
+        }
+      }
+    }
+    return score;
+  }
+
+  private _pieceValue(piece: string): number {
+    switch (piece.toLowerCase()) {
+      case 'p':
+        return 1;
+      case '+p':
+        return 7;
+      case 'l':
+        return 3;
+      case '+l':
+        return 6;
+      case 'n':
+        return 4;
+      case '+n':
+        return 6;
+      case 's':
+        return 5;
+      case '+s':
+        return 6;
+      case 'g':
+        return 6;
+      case 'b':
+        return 8;
+      case '+b':
+        return 10;
+      case 'r':
+        return 9;
+      case '+r':
+        return 11;
+      case 'k':
+        return 1000;
+      default:
+        return 0;
+    }
   }
 
   /**
