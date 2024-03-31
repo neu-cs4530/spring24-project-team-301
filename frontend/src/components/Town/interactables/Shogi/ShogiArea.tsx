@@ -30,7 +30,6 @@ export default function ShogiArea({
   const [black, setBlack] = useState<PlayerController | undefined>(gameAreaController.black);
   const [white, setWhite] = useState<PlayerController | undefined>(gameAreaController.white);
   const [joiningGame, setJoiningGame] = useState(false);
-  // const [winner, setWinner] = useState<PlayerController | undefined>(undefined);
 
   const [gameStatus, setGameStatus] = useState<GameStatus>(gameAreaController.status);
   const [moveCount, setMoveCount] = useState<number>(gameAreaController.moveCount);
