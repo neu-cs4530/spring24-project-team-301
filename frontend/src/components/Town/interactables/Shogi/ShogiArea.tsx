@@ -235,11 +235,13 @@ export default function ShogiArea({
     <>
       {gameStatusText}
       <List aria-label='list of players in the game'>
-        <ListItem>
-          Black: {black?.userName || '(No player yet!)'} {formatTime(blackTime)}
+        <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div>Black: {black?.userName || '(No player yet!)'}</div>
+          <div style={{ paddingRight: '35px' }}>{formatTime(blackTime)}</div>
         </ListItem>
-        <ListItem>
-          White: {white?.userName || '(No player yet!)'} {formatTime(whiteTime)}
+        <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div>White: {white?.userName || '(No player yet!)'}</div>
+          <div style={{ paddingRight: '35px' }}>{formatTime(whiteTime)}</div>
         </ListItem>
       </List>
       <ShogiBoard gameAreaController={gameAreaController} />
