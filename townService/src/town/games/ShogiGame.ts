@@ -245,7 +245,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
       return false;
     }
     if (piece === 'L') {
-      if (from.col === to.col && from.row < to.row) {
+      if (from.col === to.col && from.row > to.row) {
         for (let i = from.row - 1; i > to.row; i--) {
           if (board[i][from.col] !== ' ') {
             return false;
@@ -256,7 +256,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
       return false;
     }
     if (piece === 'l') {
-      if (from.col === to.col && from.row > to.row) {
+      if (from.col === to.col && from.row < to.row) {
         for (let i = from.row + 1; i < to.row; i++) {
           if (board[i][from.col] !== ' ') {
             return false;
@@ -285,7 +285,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
       return false;
     }
     if (piece === 'S') {
-      if (from.col === to.col && from.row === to.row - 1) {
+      if (from.col === to.col && from.row === to.row + 1) {
         return true;
       }
       if (from.col === to.col + 1 && from.row === to.row - 1) {
@@ -303,7 +303,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
       return false;
     }
     if (piece === 's') {
-      if (from.col === to.col && from.row === to.row + 1) {
+      if (from.col === to.col && from.row === to.row - 1) {
         return true;
       }
       if (from.col === to.col + 1 && from.row === to.row - 1) {
@@ -675,8 +675,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
    * @param col The column of the piece
    * @returns All valid moves for the piece
    */
-  public getValidMovesForPiece(row: number, col: number): ShogiMove[] {
-    const board = this._board;
+  protected getValidMovesForPieceOnBoard(row: number, col: number, board: string[][]): ShogiMove[] {
     const validMoves: ShogiMove[] = [];
     for (let x = 0; x < board.length; x++) {
       for (let y = 0; y < board[x].length; y++) {
@@ -694,6 +693,16 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
   }
 
   /**
+   * Gets all valid moves for a piece on the current board state
+   * @param row The row of the piece
+   * @param col The column of the piece
+   * @returns all valid moves for the piece
+   */
+  public getValidMovesForPiece(row: number, col: number): ShogiMove[] {
+    return this.getValidMovesForPieceOnBoard(row, col, this._board);
+  }
+
+  /**
    * Gets all valid moves
    * @returns All valid moves for the current player
    */
@@ -703,7 +712,12 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     for (let i = 0; i < board.length; i++) {
       for (let j = 0; j < board[i].length; j++) {
         const piece = board[i][j];
-        if (piece !== ' ') {
+        if (
+          piece !== ' ' &&
+          (this.state.numMoves % 2 === 0
+            ? piece === piece.toUpperCase()
+            : piece === piece.toLowerCase())
+        ) {
           this.getValidMovesForPiece(i, j).forEach(move => validMoves.push(move));
         }
       }
@@ -741,7 +755,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
       for (let j = 0; j < this._board[i].length; j++) {
         const piece = board[i][j];
         if (piece !== ' ') {
-          const moves = this.getValidMovesForPiece(i, j);
+          const moves = this.getValidMovesForPieceOnBoard(i, j, board);
           for (const move of moves) {
             const simulatedBoard = this._simulateMove(move, board);
             const value = -this._negamax(simulatedBoard, depth - 1);

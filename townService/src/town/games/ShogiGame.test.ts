@@ -857,4 +857,109 @@ describe('ShogiGame', () => {
       });
     });
   });
+  describe('getValidMovesForPiece', () => {
+    beforeEach(() => {
+      game = new ShogiGame();
+      const player1 = createPlayerForTesting();
+      const player2 = createPlayerForTesting();
+      game.join(player1);
+      game.join(player2);
+      game.startGame(player1);
+      game.startGame(player2);
+    });
+    it('should return the valid moves for a piece', () => {
+      const moves = game.getValidMovesForPiece(6, 7);
+      expect(moves).toEqual([
+        { from: { row: 6, col: 7 }, to: { row: 5, col: 7 }, promotion: false },
+      ]);
+    });
+    it('should return an empty array for an empty square', () => {
+      const moves = game.getValidMovesForPiece(4, 4);
+      expect(moves).toEqual([]);
+    });
+    it('should return an empty array for a piece that has no moves', () => {
+      const moves = game.getValidMovesForPiece(7, 1);
+      expect(moves).toEqual([]);
+    });
+  });
+  describe('getAllValidMoves', () => {
+    beforeEach(() => {
+      game = new ShogiGame();
+      const player1 = createPlayerForTesting();
+      const player2 = createPlayerForTesting();
+      game.join(player1);
+      game.join(player2);
+      game.startGame(player1);
+      game.startGame(player2);
+    });
+    it('should return the valid moves for all pieces', () => {
+      const moves = game.getAllValidMoves();
+      expect(
+        moves.sort((a, b) => {
+          // Compare 'from' row
+          if (a.from.row !== b.from.row) {
+            return a.from.row - b.from.row;
+          }
+          // If 'from' row is equal, compare 'from' col
+          if (a.from.col !== b.from.col) {
+            return a.from.col - b.from.col;
+          }
+          // If 'from' col is also equal, move to comparing 'to' row
+          if (a.to.row !== b.to.row) {
+            return a.to.row - b.to.row;
+          }
+          // If 'to' row is equal, compare 'to' col
+          return a.to.col - b.to.col;
+        }),
+      ).toEqual(
+        [
+          { from: { row: 6, col: 8 }, to: { row: 5, col: 8 }, promotion: false },
+          { from: { row: 6, col: 7 }, to: { row: 5, col: 7 }, promotion: false },
+          { from: { row: 6, col: 6 }, to: { row: 5, col: 6 }, promotion: false },
+          { from: { row: 6, col: 5 }, to: { row: 5, col: 5 }, promotion: false },
+          { from: { row: 6, col: 4 }, to: { row: 5, col: 4 }, promotion: false },
+          { from: { row: 6, col: 3 }, to: { row: 5, col: 3 }, promotion: false },
+          { from: { row: 6, col: 2 }, to: { row: 5, col: 2 }, promotion: false },
+          { from: { row: 6, col: 1 }, to: { row: 5, col: 1 }, promotion: false },
+          { from: { row: 6, col: 0 }, to: { row: 5, col: 0 }, promotion: false },
+          { from: { row: 7, col: 7 }, to: { row: 7, col: 8 }, promotion: false },
+          { from: { row: 7, col: 7 }, to: { row: 7, col: 6 }, promotion: false },
+          { from: { row: 7, col: 7 }, to: { row: 7, col: 5 }, promotion: false },
+          { from: { row: 7, col: 7 }, to: { row: 7, col: 4 }, promotion: false },
+          { from: { row: 7, col: 7 }, to: { row: 7, col: 3 }, promotion: false },
+          { from: { row: 7, col: 7 }, to: { row: 7, col: 2 }, promotion: false },
+          { from: { row: 8, col: 8 }, to: { row: 7, col: 8 }, promotion: false },
+          { from: { row: 8, col: 6 }, to: { row: 7, col: 6 }, promotion: false },
+          { from: { row: 8, col: 6 }, to: { row: 7, col: 5 }, promotion: false }, //
+          { from: { row: 8, col: 5 }, to: { row: 7, col: 6 }, promotion: false }, //
+          { from: { row: 8, col: 5 }, to: { row: 7, col: 5 }, promotion: false }, //
+          { from: { row: 8, col: 5 }, to: { row: 7, col: 4 }, promotion: false }, //
+          { from: { row: 8, col: 4 }, to: { row: 7, col: 5 }, promotion: false }, //
+          { from: { row: 8, col: 4 }, to: { row: 7, col: 4 }, promotion: false }, //
+          { from: { row: 8, col: 4 }, to: { row: 7, col: 3 }, promotion: false }, //
+          { from: { row: 8, col: 3 }, to: { row: 7, col: 4 }, promotion: false }, //
+          { from: { row: 8, col: 3 }, to: { row: 7, col: 3 }, promotion: false }, //
+          { from: { row: 8, col: 3 }, to: { row: 7, col: 2 }, promotion: false }, //
+          { from: { row: 8, col: 2 }, to: { row: 7, col: 3 }, promotion: false }, //
+          { from: { row: 8, col: 2 }, to: { row: 7, col: 2 }, promotion: false },
+          { from: { row: 8, col: 0 }, to: { row: 7, col: 0 }, promotion: false },
+        ].sort((a, b) => {
+          // Compare 'from' row
+          if (a.from.row !== b.from.row) {
+            return a.from.row - b.from.row;
+          }
+          // If 'from' row is equal, compare 'from' col
+          if (a.from.col !== b.from.col) {
+            return a.from.col - b.from.col;
+          }
+          // If 'from' col is also equal, move to comparing 'to' row
+          if (a.to.row !== b.to.row) {
+            return a.to.row - b.to.row;
+          }
+          // If 'to' row is equal, compare 'to' col
+          return a.to.col - b.to.col;
+        }),
+      );
+    });
+  });
 });
