@@ -224,7 +224,7 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
    * If the turn has changed, emits a turnChanged event with the new turn (true if our turn, false otherwise)
    * If the turn has not changed, does not emit a turnChanged event.
    */
-  protected _updateFrom(newModel: GameArea<ShogiGameState>): void {
+  public _updateFrom(newModel: GameArea<ShogiGameState>): void {
     const wasOurTurn = this.isOurTurn;
     super._updateFrom(newModel);
     const newGame = newModel.game;
@@ -232,7 +232,7 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
       const newBoard = createBoardFromSfen(newGame.state.sfen);
       if (!_.isEqual(newBoard, this._board)) {
         this._board = newBoard;
-        this.emit('boxardChanged', this._board);
+        this.emit('boardChanged', this._board);
       }
     }
     const isOurTurn = this.isOurTurn;
