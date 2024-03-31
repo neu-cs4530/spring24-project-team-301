@@ -7,7 +7,7 @@ import { ValidateError } from 'tsoa';
 import fs from 'fs/promises';
 import { Server as SocketServer } from 'socket.io';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, increment, updateDoc } from 'firebase/firestore';
 import { RegisterRoutes } from '../generated/routes';
 import TownsStore from './lib/TownsStore';
 import { ClientToServerEvents, ServerToClientEvents } from './types/CoveyTownSocket';
@@ -72,25 +72,43 @@ app.post('/createAccount', async (_req: Express.Request, res: Express.Response) 
 // user win
 app.put('/win', async (_req: Express.Request, res: Express.Response) => {
   if (_req.body.email) {
-    const accountRef = doc(firestore, 'ShogiRecords', _req.body.email);
-    await setDoc(accountRef, { win: 1 }, { merge: true });
+    try {
+      const accountRef = doc(firestore, 'ShogiRecords', _req.body.email);
+      await updateDoc(accountRef, { win: increment(1) });
+      return res.status(200).send('Record updated');
+    } catch (e) {
+      return res.status(500).send('Record update failed');
+    }
   }
+  return res.status(400).send('Invalid body');
 });
 
 // user loss
 app.put('/loss', async (_req: Express.Request, res: Express.Response) => {
   if (_req.body.email) {
-    const accountRef = doc(firestore, 'ShogiRecords', _req.body.email);
-    await setDoc(accountRef, { loss: 1 }, { merge: true });
+    try {
+      const accountRef = doc(firestore, 'ShogiRecords', _req.body.email);
+      await updateDoc(accountRef, { loss: increment(1) });
+      return res.status(200).send('Record updated');
+    } catch (e) {
+      return res.status(500).send('Record update failed');
+    }
   }
+  return res.status(400).send('Invalid body');
 });
 
 // user draw
 app.put('/draw', async (_req: Express.Request, res: Express.Response) => {
   if (_req.body.email) {
-    const accountRef = doc(firestore, 'ShogiRecords', _req.body.email);
-    await setDoc(accountRef, { draw: 1 }, { merge: true });
+    try {
+      const accountRef = doc(firestore, 'ShogiRecords', _req.body.email);
+      await updateDoc(accountRef, { draw: increment(1) });
+      return res.status(200).send('Record updated');
+    } catch (e) {
+      return res.status(500).send('Record update failed');
+    }
   }
+  return res.status(400).send('Invalid body');
 });
 
 // Register the TownsController routes with the express server

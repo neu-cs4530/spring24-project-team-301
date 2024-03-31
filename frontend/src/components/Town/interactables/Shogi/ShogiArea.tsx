@@ -6,45 +6,20 @@ import { useInteractableAreaController } from '../../../../classes/TownControlle
 import useTownController from '../../../../hooks/useTownController';
 import { GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
 import ShogiBoard from './ShogiBoard';
+import axios from 'axios';
 
 /**
- * The ConnectFourArea component renders the Connect Four game area.
+ * The ShogiArea component renders the Shogi game area.
  * It renders the current state of the area, optionally allowing the player to join the game.
  *
  * It uses Chakra-UI components (does not use other GUI widgets)
  *
- * It uses the ConnectFourAreaController to get the current state of the game.
+ * It uses the ShogiAreaController to get the current state of the game.
  * It listens for the 'gameUpdated' and 'gameEnd' events on the controller, and re-renders accordingly.
  * It subscribes to these events when the component mounts, and unsubscribes when the component unmounts. It also unsubscribes when the gameAreaController changes.
  *
- * It renders the following:
- * - A list of players' usernames (in a list with the aria-label 'list of players in the game', one item for red and one for yellow)
- *    - If there is no player in the game, the username is '(No player yet!)'
- *    - List the players as (exactly) `Red: ${username}` and `Yellow: ${username}`
- * - A message indicating the current game status:
- *    - If the game is in progress, the message is 'Game in progress, {moveCount} moves in, currently {whoseTurn}'s turn'. If it is currently our player's turn, the message is 'Game in progress, {moveCount} moves in, currently your turn'
- *    - If the game is in status WAITING_FOR_PLAYERS, the message is 'Waiting for players to join'
- *    - If the game is in status WAITING_TO_START, the message is 'Waiting for players to press start'
- *    - If the game is in status OVER, the message is 'Game over'
- * - If the game is in status WAITING_FOR_PLAYERS or OVER, a button to join the game is displayed, with the text 'Join New Game'
- *    - Clicking the button calls the joinGame method on the gameAreaController
- *    - Before calling joinGame method, the button is disabled and has the property isLoading set to true, and is re-enabled when the method call completes
- *    - If the method call fails, a toast is displayed with the error message as the description of the toast (and status 'error')
- *    - Once the player joins the game, the button dissapears
- * - If the game is in status WAITING_TO_START, a button to start the game is displayed, with the text 'Start Game'
- *    - Clicking the button calls the startGame method on the gameAreaController
- *    - Before calling startGame method, the button is disabled and has the property isLoading set to true, and is re-enabled when the method call completes
- *    - If the method call fails, a toast is displayed with the error message as the description of the toast (and status 'error')
- *    - Once the game starts, the button dissapears
- * - The ConnectFourBoard component, which is passed the current gameAreaController as a prop (@see ConnectFourBoard.tsx)
- *
- * - When the game ends, a toast is displayed with the result of the game:
- *    - Tie: description 'Game ended in a tie'
- *    - Our player won: description 'You won!'
- *    - Our player lost: description 'You lost :('
- *
  */
-export default function ConnectFourArea({
+export default function ShogiArea({
   interactableID,
 }: {
   interactableID: InteractableID;
@@ -55,10 +30,75 @@ export default function ConnectFourArea({
   const [black, setBlack] = useState<PlayerController | undefined>(gameAreaController.black);
   const [white, setWhite] = useState<PlayerController | undefined>(gameAreaController.white);
   const [joiningGame, setJoiningGame] = useState(false);
+  // const [winner, setWinner] = useState<PlayerController | undefined>(undefined);
 
   const [gameStatus, setGameStatus] = useState<GameStatus>(gameAreaController.status);
   const [moveCount, setMoveCount] = useState<number>(gameAreaController.moveCount);
+
+  const startingTimer = (1 / 6.0) * 60;
+  const [whiteTime, setWhiteTime] = useState(startingTimer);
+  const [blackTime, setBlackTime] = useState(startingTimer);
+
+  const formatTime = (timeInSeconds: number): string => {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = timeInSeconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+
   const toast = useToast();
+
+  // maintain player timers
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (gameStatus === 'IN_PROGRESS') {
+        if (gameAreaController.whoseTurn?.id === gameAreaController.white?.id) {
+          if (whiteTime === 0) {
+            const model = gameAreaController.toInteractableAreaModel();
+            let newModel = model;
+            if (model.game) {
+              newModel = {
+                ...model,
+                game: {
+                  ...model.game,
+                  state: {
+                    ...model.game.state,
+                    status: 'OVER',
+                    winner: gameAreaController.black?.id,
+                  },
+                },
+              };
+            }
+            gameAreaController._updateFrom(newModel);
+          } else {
+            setWhiteTime(whiteTime - 1);
+          }
+        } else {
+          if (blackTime === 0) {
+            const model = gameAreaController.toInteractableAreaModel();
+            let newModel = model;
+            if (model.game) {
+              newModel = {
+                ...model,
+                game: {
+                  ...model.game,
+                  state: {
+                    ...model.game.state,
+                    status: 'OVER',
+                    winner: gameAreaController.white?.id,
+                  },
+                },
+              };
+            }
+            gameAreaController._updateFrom(newModel);
+          } else {
+            setBlackTime(blackTime - 1);
+          }
+        }
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [blackTime, gameAreaController, gameStatus, whiteTime]);
+
   useEffect(() => {
     const updateGameState = () => {
       setBlack(gameAreaController.black);
@@ -66,7 +106,8 @@ export default function ConnectFourArea({
       setGameStatus(gameAreaController.status || 'WAITING_TO_START');
       setMoveCount(gameAreaController.moveCount || 0);
     };
-    const onGameEnd = () => {
+    gameAreaController.addListener('gameUpdated', updateGameState);
+    const onGameEnd = async () => {
       const winner = gameAreaController.winner;
       if (!winner) {
         toast({
@@ -74,27 +115,56 @@ export default function ConnectFourArea({
           description: 'Game ended in a tie',
           status: 'info',
         });
+        console.log('Game ended in a tie');
+        const body = {
+          email: townController.ourPlayer?.userName,
+        };
+        const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/draw`, body);
+        console.log(res);
+        if (res.status !== 200) {
+          throw new Error('Failed to register draw');
+        }
+        console.log('Record updates successful');
       } else if (winner === townController.ourPlayer) {
         toast({
           title: 'Game over',
           description: 'You won!',
           status: 'success',
         });
+        console.log('You won!');
+        const body = {
+          email: townController.ourPlayer?.userName,
+        };
+        const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/win`, body);
+        console.log(res);
+        if (res.status !== 200) {
+          throw new Error('Failed to register win');
+        }
+        console.log('Record updates successful');
       } else {
         toast({
           title: 'Game over',
           description: `You lost :(`,
           status: 'error',
         });
+        console.log('You lost :(');
+        const body = {
+          email: townController.ourPlayer?.userName,
+        };
+        const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/loss`, body);
+        console.log(res);
+        if (res.status !== 200) {
+          throw new Error('Failed to register loss');
+        }
+        console.log('Record updates successful');
       }
     };
-    gameAreaController.addListener('gameUpdated', updateGameState);
     gameAreaController.addListener('gameEnd', onGameEnd);
     return () => {
       gameAreaController.removeListener('gameUpdated', updateGameState);
       gameAreaController.removeListener('gameEnd', onGameEnd);
     };
-  }, [townController, gameAreaController, toast]);
+  }, [townController, gameAreaController, toast, gameStatus]);
   let gameStatusText = <></>;
   if (gameStatus === 'IN_PROGRESS') {
     gameStatusText = (
@@ -165,8 +235,12 @@ export default function ConnectFourArea({
     <>
       {gameStatusText}
       <List aria-label='list of players in the game'>
-        <ListItem>Black: {black?.userName || '(No player yet!)'}</ListItem>
-        <ListItem>White: {white?.userName || '(No player yet!)'}</ListItem>
+        <ListItem>
+          Black: {black?.userName || '(No player yet!)'} {formatTime(blackTime)}
+        </ListItem>
+        <ListItem>
+          White: {white?.userName || '(No player yet!)'} {formatTime(whiteTime)}
+        </ListItem>
       </List>
       <ShogiBoard gameAreaController={gameAreaController} />
     </>
