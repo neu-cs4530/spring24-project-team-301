@@ -119,7 +119,7 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
                   quality={10}
                   src={'/shogi/'
                     .concat(board[rowIndex][colIndex]?.toUpperCase() as string)
-                  .concat('.png')}></Image>
+                    .concat('.png')}></Image>
               ) : null}
             </StyledShogiSquare>
           );
