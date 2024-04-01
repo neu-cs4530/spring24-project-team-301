@@ -4,6 +4,7 @@ import ShogiAreaController, {
 import { Button, chakra, Container, useToast } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import { ShogiIndex } from '../../../../types/CoveyTownSocket';
+import Image from 'next/image';
 
 export type ShogiGameProps = {
   gameAreaController: ShogiAreaController;
@@ -82,11 +83,19 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
                       rowIndex as ShogiIndex,
                       colIndex as ShogiIndex,
                     );
+                    setFrom({
+                      row: -1,
+                      col: -1,
+                    });
                   } catch (e) {
                     toast({
                       title: 'Error making move',
                       description: (e as Error).toString(),
                       status: 'error',
+                    });
+                    setFrom({
+                      row: -1,
+                      col: -1,
                     });
                   }
                 } else if (from.row === rowIndex && from.row === colIndex) {
@@ -103,7 +112,16 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
               }}
               disabled={!isOurTurn}
               backgroundColor={cell}
-              aria-label={`Cell ${rowIndex},${colIndex} (${cell || 'Empty'})`}></StyledShogiSquare>
+              aria-label={`Cell ${rowIndex},${colIndex} (${cell || 'Empty'})`}>
+              {board[rowIndex][colIndex] !== ' ' && board[rowIndex][colIndex] !== undefined ? (
+                <Image
+                  layout='fill'
+                  quality={10}
+                  src={'/shogi/'
+                    .concat(board[rowIndex][colIndex]?.toUpperCase() as string)
+                    .concat('.png')}></Image>
+              ) : null}
+            </StyledShogiSquare>
           );
         });
       })}
