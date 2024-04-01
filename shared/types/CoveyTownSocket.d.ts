@@ -123,7 +123,7 @@ export interface TicTacToeGameState extends WinnableGameState {
 /**
  * Type for a piece in Shogi
  */
-export type ShogiPiece = 'P' | '+P' | 'L' | '+L' | 'N' | '+N' | 'S' | '+S' | 'G' | 'B' | '+B' | 'R' | '+R' | 'K' | 'p' | '+p' | 'l' | '+l' | 'n' | '+n' | 's' | '+s' | 'g' | 'b' | '+b' | 'r' | '+r' | 'k';
+export type ShogiPiece = 'P' | '+P' | 'L' | '+L' | 'N' | '+N' | 'S' | '+S' | 'G' | 'B' | '+B' | 'R' | '+R' | 'K' | 'p' | '+p' | 'l' | '+l' | 'n' | '+n' | 's' | '+s' | 'g' | 'b' | '+b' | 'r' | '+r' | 'k' | " ";
 
 /**
  * Type for a position index in Shogi

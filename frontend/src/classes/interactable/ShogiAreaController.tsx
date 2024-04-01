@@ -48,6 +48,7 @@ function createBoardFromSfen(sfen: string): ShogiCell[][] {
       }
     }
   }
+  console.log(board);
 
   return board;
 }

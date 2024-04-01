@@ -89,6 +89,10 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
                       description: (e as Error).toString(),
                       status: 'error',
                     });
+                    setFrom({
+                      row: -1,
+                      col: -1,
+                    });
                   }
                 } else if (from.row === rowIndex && from.row === colIndex) {
                   setFrom({
@@ -105,8 +109,13 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
               disabled={!isOurTurn}
               backgroundColor={cell}
               aria-label={`Cell ${rowIndex},${colIndex} (${cell || 'Empty'})`}>
-              {board[rowIndex][colIndex] ? (
-                <Image src={board[rowIndex][colIndex]?.toUpperCase() as string}></Image>
+              {board[rowIndex][colIndex] !== ' ' && board[rowIndex][colIndex] !== undefined ? (
+                <Image
+                  layout='fill'
+                  quality={10}
+                  src={'/shogi/'
+                    .concat(board[rowIndex][colIndex]?.toUpperCase() as string)
+                  .concat('.png')}></Image>
               ) : null}
             </StyledShogiSquare>
           );
