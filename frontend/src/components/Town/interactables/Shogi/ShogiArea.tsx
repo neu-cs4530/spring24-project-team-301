@@ -125,21 +125,31 @@ export default function ShogiArea({
         }
         console.log('Record updates successful');
       } else if (winner === townController.ourPlayer) {
-        toast({
-          title: 'Game over',
-          description: 'You won!',
-          status: 'success',
-        });
-        console.log('You won!');
-        const body = {
-          email: townController.ourPlayer?.userName,
-        };
-        const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/win`, body);
-        console.log(res);
-        if (res.status !== 200) {
-          throw new Error('Failed to register win');
+        // if black and white exist
+        if (black && white) {
+          toast({
+            title: 'Game over',
+            description: 'You won!',
+            status: 'success',
+          });
+          console.log('You won!');
+          const body = {
+            email: townController.ourPlayer?.userName,
+          };
+          const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/win`, body);
+          console.log(res);
+          if (res.status !== 200) {
+            throw new Error('Failed to register win');
+          }
+          console.log('Record updates successful');
+        } else {
+          toast({
+            title: 'Opponent left',
+            description: 'Game has ended',
+            status: 'info',
+          });
+          console.log('Opponent left, game ended');
         }
-        console.log('Record updates successful');
       } else {
         toast({
           title: 'Game over',
