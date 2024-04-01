@@ -230,17 +230,23 @@ export default function ShogiArea({
       </b>
     );
   }
+  let blackTimer = '';
+  let whiteTimer = '';
+  if (gameStatus === 'WAITING_TO_START' || gameStatus === 'IN_PROGRESS') {
+    blackTimer = formatTime(blackTime);
+    whiteTimer = formatTime(whiteTime);
+  }
   return (
     <>
       {gameStatusText}
       <List aria-label='list of players in the game'>
         <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
           <div>Black: {black?.userName || '(No player yet!)'}</div>
-          <div style={{ paddingRight: '35px' }}>{formatTime(blackTime)}</div>
+          <div style={{ paddingRight: '35px' }}>{blackTimer}</div>
         </ListItem>
         <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
           <div>White: {white?.userName || '(No player yet!)'}</div>
-          <div style={{ paddingRight: '35px' }}>{formatTime(whiteTime)}</div>
+          <div style={{ paddingRight: '35px' }}>{whiteTimer}</div>
         </ListItem>
       </List>
       <ShogiBoard gameAreaController={gameAreaController} />
