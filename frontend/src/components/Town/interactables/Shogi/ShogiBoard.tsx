@@ -4,6 +4,7 @@ import ShogiAreaController, {
 import { Button, chakra, Container, useToast } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import { ShogiIndex } from '../../../../types/CoveyTownSocket';
+import Image from 'next/image';
 
 export type ShogiGameProps = {
   gameAreaController: ShogiAreaController;
@@ -103,7 +104,11 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
               }}
               disabled={!isOurTurn}
               backgroundColor={cell}
-              aria-label={`Cell ${rowIndex},${colIndex} (${cell || 'Empty'})`}></StyledShogiSquare>
+              aria-label={`Cell ${rowIndex},${colIndex} (${cell || 'Empty'})`}>
+              {board[rowIndex][colIndex] ? (
+                <Image src={board[rowIndex][colIndex]?.toUpperCase() as string}></Image>
+              ) : null}
+            </StyledShogiSquare>
           );
         });
       })}

@@ -6,6 +6,7 @@ import {
   ShogiMove,
   GameArea,
   GameStatus,
+  ShogiPiece,
 } from '../../types/CoveyTownSocket';
 import PlayerController from '../PlayerController';
 import GameAreaController, {
@@ -15,7 +16,7 @@ import GameAreaController, {
   PLAYER_NOT_IN_GAME_ERROR,
 } from './GameAreaController';
 
-export type ShogiCell = ShogiColor | undefined;
+export type ShogiCell = ShogiPiece | undefined;
 export type ShogiEvents = GameEventTypes & {
   boardChanged: (board: ShogiCell[][]) => void;
   turnChanged: (isOurTurn: boolean) => void;
