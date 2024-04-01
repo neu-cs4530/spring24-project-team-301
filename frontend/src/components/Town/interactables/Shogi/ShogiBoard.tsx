@@ -83,6 +83,10 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
                       rowIndex as ShogiIndex,
                       colIndex as ShogiIndex,
                     );
+                    setFrom({
+                      row: -1,
+                      col: -1,
+                    });
                   } catch (e) {
                     toast({
                       title: 'Error making move',
