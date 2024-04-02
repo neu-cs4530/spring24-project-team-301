@@ -247,7 +247,19 @@ describe('ShogiGame', () => {
         }),
       ).toThrow(BOARD_POSITION_NOT_VALID_MESSAGE);
     });
-
+    it('should throw an error when trying to move the other sides pieces', () => {
+      expect(() =>
+        game.applyMove({
+          gameID: game.id,
+          move: {
+            from: { row: 2, col: 1 },
+            to: { row: 3, col: 2 },
+            promotion: false,
+          },
+          playerID: player1.id,
+        }),
+      ).toThrow(BOARD_POSITION_NOT_VALID_MESSAGE);
+    });
     it('when given a move that does not win the game, it does not end it', () => {
       const moves: GameMove<ShogiMove>[] = [
         {

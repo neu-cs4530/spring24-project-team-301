@@ -267,19 +267,19 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
       return false;
     }
     if (piece === 'N') {
-      if (from.col + 1 === to.col && from.row === to.row - 2) {
+      if (from.col + 1 === to.col && from.row === to.row + 2) {
         return true;
       }
-      if (from.col - 1 === to.col && from.row === to.row - 2) {
+      if (from.col - 1 === to.col && from.row === to.row + 2) {
         return true;
       }
       return false;
     }
     if (piece === 'n') {
-      if (from.col + 1 === to.col && from.row === to.row + 2) {
+      if (from.col + 1 === to.col && from.row === to.row - 2) {
         return true;
       }
-      if (from.col - 1 === to.col && from.row === to.row + 2) {
+      if (from.col - 1 === to.col && from.row === to.row - 2) {
         return true;
       }
       return false;
@@ -561,9 +561,15 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     const {
       move: { from, to, promotion },
     } = move;
+    const board = this._board;
+    const piece = board[from.row][from.col];
+    if (
+      (move.playerID === this.state.black && piece !== piece.toUpperCase()) ||
+      (move.playerID === this.state.white && piece !== piece.toLowerCase())
+    ) {
+      throw new InvalidParametersError(BOARD_POSITION_NOT_VALID_MESSAGE);
+    }
     if (this.validateMove(move)) {
-      const board = this._board;
-      const piece = board[from.row][from.col];
       if (board[to.row][to.col] !== ' ') {
         const inhand = this.state.inhand + board[to.row][to.col];
         this.state = {
