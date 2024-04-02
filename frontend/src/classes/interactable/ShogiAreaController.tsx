@@ -327,5 +327,4 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
     });
     return response.moves;
   }
-
 }
