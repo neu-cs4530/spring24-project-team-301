@@ -11,7 +11,6 @@ import {
   InteractableCommand,
   InteractableCommandReturnType,
   InteractableType,
-  ValidMovesCommand,
 } from '../../types/CoveyTownSocket';
 import ShogiGame from './ShogiGame';
 import GameArea from './GameArea';
