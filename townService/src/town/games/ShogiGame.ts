@@ -591,9 +591,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
         // drop pawn mate rule
         // a pawn cannot be dropped for checkmate
         if (move.move.drop === 'P' || move.move.drop === 'p') {
-          throw new InvalidParametersError(
-            BOARD_POSITION_NOT_VALID_MESSAGE + this._board[from.row][from.col],
-          );
+          throw new InvalidParametersError(BOARD_POSITION_NOT_VALID_MESSAGE);
         }
         this.state = {
           ...this.state,
@@ -602,9 +600,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
         };
       }
     } else {
-      throw new InvalidParametersError(
-        BOARD_POSITION_NOT_VALID_MESSAGE + this._board[from.row][from.col],
-      );
+      throw new InvalidParametersError(BOARD_POSITION_NOT_VALID_MESSAGE);
     }
   }
 
