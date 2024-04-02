@@ -46,6 +46,69 @@ export default function ShogiArea({
 
   const toast = useToast();
 
+  const [blackRecord, setBlackRecord] = useState({ wins: 0, losses: 0, draws: 0 });
+  const [whiteRecord, setWhiteRecord] = useState({ wins: 0, losses: 0, draws: 0 });
+
+  useEffect(() => {
+    const fetchRecords = async (email: string) => {
+      let wins;
+      let losses;
+      let draws;
+      try {
+        const resWins = await axios.get(
+          `${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/wins?email=${email}`,
+        );
+        if (resWins.status !== 200) {
+          throw new Error(`Failed to fetch wins for ${email}`);
+        }
+        wins = resWins.data.wins;
+
+        const resLosses = await axios.get(
+          `${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/losses?email=${email}`,
+        );
+        if (resLosses.status !== 200) {
+          throw new Error(`Failed to fetch lossses for ${email}`);
+        }
+        losses = resLosses.data.losses;
+
+        const resDraws = await axios.get(
+          `${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/draws?email=${email}`,
+        );
+        if (resDraws.status !== 200) {
+          throw new Error(`Failed to fetch draws for ${email}`);
+        }
+        draws = resDraws.data.draws;
+
+        return { wins, losses, draws };
+      } catch (error) {
+        console.error('Error fetching records:', error);
+        return { wins: 0, losses: 0, draws: 0 };
+      }
+    };
+
+    const fetchAndUpdateStats = async () => {
+      if (black && white) {
+        const [newBlackRecord, newWhiteRecord] = await Promise.all([
+          fetchRecords(black?.userName || ''),
+          fetchRecords(white?.userName || ''),
+        ]);
+
+        setBlackRecord(newBlackRecord);
+        setWhiteRecord(newWhiteRecord);
+      } else if (white) {
+        const newWhiteRecord = await fetchRecords(white?.userName || '');
+        setWhiteRecord(newWhiteRecord);
+      } else if (black) {
+        const newBlackRecord = await fetchRecords(black?.userName || '');
+        setBlackRecord(newBlackRecord);
+      }
+    };
+
+    fetchAndUpdateStats();
+
+    return () => {};
+  }, [gameAreaController, black, white]);
+
   // maintain player timers
   useEffect(() => {
     const timer = setInterval(() => {
@@ -160,7 +223,7 @@ export default function ShogiArea({
         const body = {
           email: townController.ourPlayer?.userName,
         };
-        const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/loss`, body);
+        const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/lose`, body);
         console.log(res);
         if (res.status !== 200) {
           throw new Error('Failed to register loss');
@@ -173,7 +236,7 @@ export default function ShogiArea({
       gameAreaController.removeListener('gameUpdated', updateGameState);
       gameAreaController.removeListener('gameEnd', onGameEnd);
     };
-  }, [townController, gameAreaController, toast, gameStatus]);
+  }, [townController, gameAreaController, toast, gameStatus, black, white]);
   let gameStatusText = <></>;
   if (gameStatus === 'IN_PROGRESS') {
     gameStatusText = (
@@ -241,7 +304,15 @@ export default function ShogiArea({
     );
   }
   let blackTimer = '';
+  let blackRecordText = '';
   let whiteTimer = '';
+  let whiteRecordText = '';
+  if (black) {
+    blackRecordText = `(${blackRecord.wins}-${blackRecord.losses}-${blackRecord.draws})`;
+  }
+  if (white) {
+    whiteRecordText = `(${whiteRecord.wins}-${whiteRecord.losses}-${whiteRecord.draws})`;
+  }
   if (gameStatus === 'WAITING_TO_START' || gameStatus === 'IN_PROGRESS') {
     blackTimer = formatTime(blackTime);
     whiteTimer = formatTime(whiteTime);
@@ -252,10 +323,12 @@ export default function ShogiArea({
       <List aria-label='list of players in the game'>
         <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
           <div>Black: {black?.userName || '(No player yet!)'}</div>
+          <div>{blackRecordText}</div>
           <div style={{ paddingRight: '35px' }}>{blackTimer}</div>
         </ListItem>
         <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
           <div>White: {white?.userName || '(No player yet!)'}</div>
+          <div>{whiteRecordText}</div>
           <div style={{ paddingRight: '35px' }}>{whiteTimer}</div>
         </ListItem>
       </List>
