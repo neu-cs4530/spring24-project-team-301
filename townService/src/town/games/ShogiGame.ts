@@ -737,13 +737,13 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
    * https://en.wikipedia.org/wiki/Negamax
    * @returns The move for the engine to make.
    */
-  public getEngineMove(): ShogiMove {
+  public getEngineMove(depth: number): ShogiMove {
     const allMoves = this.getAllValidMoves();
     const bestMove: ShogiMove = allMoves[0];
     let bestValue = -Infinity;
     for (const move of allMoves) {
       const simulatedBoard = this._simulateMove(move, this._board);
-      const value = -this._negamax(simulatedBoard, 3);
+      const value = -this._negamax(simulatedBoard, depth);
       if (value > bestValue) {
         bestValue = value;
         bestMove.from = move.from;
