@@ -34,7 +34,7 @@ export default function ShogiArea({
   const [gameStatus, setGameStatus] = useState<GameStatus>(gameAreaController.status);
   const [moveCount, setMoveCount] = useState<number>(gameAreaController.moveCount);
 
-  const startingTimer = 10 * 60;
+  const startingTimer = (1 / 6.0) * 60;
   const [whiteTime, setWhiteTime] = useState(startingTimer);
   const [blackTime, setBlackTime] = useState(startingTimer);
 
@@ -48,66 +48,60 @@ export default function ShogiArea({
 
   const [blackRecord, setBlackRecord] = useState({ wins: 0, losses: 0, draws: 0 });
   const [whiteRecord, setWhiteRecord] = useState({ wins: 0, losses: 0, draws: 0 });
+  const [isLoadingBlackRecord, setIsLoadingBlackRecord] = useState(false);
+  const [isLoadingWhiteRecord, setIsLoadingWhiteRecord] = useState(false);
+
+  const fetchRecords = async (email: string) => {
+    setIsLoadingBlackRecord(true);
+    setIsLoadingWhiteRecord(true);
+    try {
+      const [resWins, resLosses, resDraws] = await Promise.all([
+        axios.get(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/wins?email=${email}`),
+        axios.get(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/losses?email=${email}`),
+        axios.get(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/draws?email=${email}`),
+      ]);
+      return {
+        wins: resWins.data.wins,
+        losses: resLosses.data.losses,
+        draws: resDraws.data.draws,
+      };
+    } catch (error) {
+      console.error('Error fetching records:', error);
+      return { wins: 0, losses: 0, draws: 0 };
+    }
+  };
+
+  const fetchAndUpdateRecords = async () => {
+    if (black && white) {
+      const [newBlackRecord, newWhiteRecord] = await Promise.all([
+        fetchRecords(black?.userName || ''),
+        fetchRecords(white?.userName || ''),
+      ]);
+
+      setBlackRecord(newBlackRecord);
+      setWhiteRecord(newWhiteRecord);
+
+      setIsLoadingBlackRecord(false);
+      setIsLoadingWhiteRecord(false);
+    } else if (white) {
+      const newWhiteRecord = await fetchRecords(white?.userName || '');
+      setWhiteRecord(newWhiteRecord);
+
+      setIsLoadingWhiteRecord(false);
+    } else if (black) {
+      const newBlackRecord = await fetchRecords(black?.userName || '');
+      setBlackRecord(newBlackRecord);
+
+      setIsLoadingBlackRecord(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchRecords = async (email: string) => {
-      let wins;
-      let losses;
-      let draws;
-      try {
-        const resWins = await axios.get(
-          `${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/wins?email=${email}`,
-        );
-        if (resWins.status !== 200) {
-          throw new Error(`Failed to fetch wins for ${email}`);
-        }
-        wins = resWins.data.wins;
-
-        const resLosses = await axios.get(
-          `${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/losses?email=${email}`,
-        );
-        if (resLosses.status !== 200) {
-          throw new Error(`Failed to fetch lossses for ${email}`);
-        }
-        losses = resLosses.data.losses;
-
-        const resDraws = await axios.get(
-          `${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/draws?email=${email}`,
-        );
-        if (resDraws.status !== 200) {
-          throw new Error(`Failed to fetch draws for ${email}`);
-        }
-        draws = resDraws.data.draws;
-
-        return { wins, losses, draws };
-      } catch (error) {
-        console.error('Error fetching records:', error);
-        return { wins: 0, losses: 0, draws: 0 };
-      }
-    };
-
-    const fetchAndUpdateStats = async () => {
-      if (black && white) {
-        const [newBlackRecord, newWhiteRecord] = await Promise.all([
-          fetchRecords(black?.userName || ''),
-          fetchRecords(white?.userName || ''),
-        ]);
-
-        setBlackRecord(newBlackRecord);
-        setWhiteRecord(newWhiteRecord);
-      } else if (white) {
-        const newWhiteRecord = await fetchRecords(white?.userName || '');
-        setWhiteRecord(newWhiteRecord);
-      } else if (black) {
-        const newBlackRecord = await fetchRecords(black?.userName || '');
-        setBlackRecord(newBlackRecord);
-      }
-    };
-
-    fetchAndUpdateStats();
-
+    if (gameStatus === 'WAITING_TO_START' || gameStatus === 'WAITING_FOR_PLAYERS') {
+      fetchAndUpdateRecords();
+    }
     return () => {};
-  }, [gameAreaController, black, white]);
+  }, [gameStatus, black, white]);
 
   // maintain player timers
   useEffect(() => {
@@ -187,8 +181,8 @@ export default function ShogiArea({
           throw new Error('Failed to register draw');
         }
         console.log('Record updates successful');
+        await fetchAndUpdateRecords();
       } else if (winner === townController.ourPlayer) {
-        // if black and white exist
         if (black && white) {
           toast({
             title: 'Game over',
@@ -205,6 +199,7 @@ export default function ShogiArea({
             throw new Error('Failed to register win');
           }
           console.log('Record updates successful');
+          await fetchAndUpdateRecords();
         } else {
           toast({
             title: 'Opponent left',
@@ -229,6 +224,7 @@ export default function ShogiArea({
           throw new Error('Failed to register loss');
         }
         console.log('Record updates successful');
+        await fetchAndUpdateRecords();
       }
     };
     gameAreaController.addListener('gameEnd', onGameEnd);
@@ -308,10 +304,16 @@ export default function ShogiArea({
   let whiteTimer = '';
   let whiteRecordText = '';
   if (black) {
-    blackRecordText = `(${blackRecord.wins}-${blackRecord.losses}-${blackRecord.draws})`;
+    blackRecordText =
+      isLoadingBlackRecord && gameStatus !== 'OVER'
+        ? '...'
+        : `(${blackRecord.wins}-${blackRecord.losses}-${blackRecord.draws})`;
   }
   if (white) {
-    whiteRecordText = `(${whiteRecord.wins}-${whiteRecord.losses}-${whiteRecord.draws})`;
+    whiteRecordText =
+      isLoadingWhiteRecord && gameStatus !== 'OVER'
+        ? '...'
+        : `(${whiteRecord.wins}-${whiteRecord.losses}-${whiteRecord.draws})`;
   }
   if (gameStatus === 'WAITING_TO_START' || gameStatus === 'IN_PROGRESS') {
     blackTimer = formatTime(blackTime);
