@@ -64,7 +64,9 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
   return (
     <>
       <Accordion allowToggle>
-        {gameAreaController.toInteractableAreaModel().type !== 'ShogiArea' ? (
+        {gameAreaController.toInteractableAreaModel().type === 'ShogiArea' ? (
+          <></>
+        ) : (
           <AccordionItem>
             <Heading as='h3'>
               <AccordionButton>
@@ -78,8 +80,6 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
               </AccordionPanel>
             </Heading>
           </AccordionItem>
-        ) : (
-          <></>
         )}
         <AccordionItem>
           <Heading as='h3'>
