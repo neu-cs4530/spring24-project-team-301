@@ -34,7 +34,7 @@ export default function ShogiArea({
   const [gameStatus, setGameStatus] = useState<GameStatus>(gameAreaController.status);
   const [moveCount, setMoveCount] = useState<number>(gameAreaController.moveCount);
 
-  const startingTimer = (1 / 6.0) * 60;
+  const startingTimer = 10 * 60;
   const [whiteTime, setWhiteTime] = useState(startingTimer);
   const [blackTime, setBlackTime] = useState(startingTimer);
 
