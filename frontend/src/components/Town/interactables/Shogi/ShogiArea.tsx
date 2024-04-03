@@ -183,31 +183,23 @@ export default function ShogiArea({
         console.log('Record updates successful');
         await fetchAndUpdateRecords();
       } else if (winner === townController.ourPlayer) {
-        if (black && white) {
-          toast({
-            title: 'Game over',
-            description: 'You won!',
-            status: 'success',
-          });
-          console.log('You won!');
-          const body = {
-            email: townController.ourPlayer?.userName,
-          };
-          const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/win`, body);
-          console.log(res);
-          if (res.status !== 200) {
-            throw new Error('Failed to register win');
-          }
-          console.log('Record updates successful');
-          await fetchAndUpdateRecords();
-        } else {
-          toast({
-            title: 'Opponent left',
-            description: 'Game has ended',
-            status: 'info',
-          });
-          console.log('Opponent left, game ended');
+        const title = black && white ? 'Game over' : 'Game over (opponent left)';
+        toast({
+          title,
+          description: 'You won!',
+          status: 'success',
+        });
+        console.log('You won!');
+        const body = {
+          email: townController.ourPlayer?.userName,
+        };
+        const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/win`, body);
+        console.log(res);
+        if (res.status !== 200) {
+          throw new Error('Failed to register win');
         }
+        console.log('Record updates successful');
+        await fetchAndUpdateRecords();
       } else {
         toast({
           title: 'Game over',
@@ -324,12 +316,12 @@ export default function ShogiArea({
       {gameStatusText}
       <List aria-label='list of players in the game'>
         <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <div>Black: {black?.userName || '(No player yet!)'}</div>
+          <div>Black: {black?.userName || '(waiting for player)'}</div>
           <div>{blackRecordText}</div>
           <div style={{ paddingRight: '35px' }}>{blackTimer}</div>
         </ListItem>
         <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <div>White: {white?.userName || '(No player yet!)'}</div>
+          <div>White: {white?.userName || '(waiting for player)'}</div>
           <div>{whiteRecordText}</div>
           <div style={{ paddingRight: '35px' }}>{whiteTimer}</div>
         </ListItem>
