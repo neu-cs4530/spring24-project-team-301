@@ -7,6 +7,7 @@ import {
   GameArea,
   GameStatus,
   ShogiPiece,
+  EngineDepth,
 } from '../../types/CoveyTownSocket';
 import PlayerController from '../PlayerController';
 import GameAreaController, {
@@ -301,7 +302,7 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
    * Does not check if the move is valid.
    * @throws an error with message NO_GAME_IN_PROGRESS_ERROR if there is no game in progress
    */
-  public async getEngineMove(): Promise<void> {
+  public async getEngineMove(depth: EngineDepth): Promise<void> {
     const instanceID = this._instanceID;
     if (!instanceID || this._model.game?.state.status !== 'IN_PROGRESS') {
       throw new Error(NO_GAME_IN_PROGRESS_ERROR);
@@ -309,6 +310,21 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
     await this._townController.sendInteractableCommand(this.id, {
       type: 'EngineMove',
       gameID: instanceID,
+      depth,
     });
+  }
+
+  public async getValidMoves(row: ShogiIndex, col: ShogiIndex): Promise<ShogiMove[]> {
+    const instanceID = this._instanceID;
+    if (!instanceID || this._model.game?.state.status !== 'IN_PROGRESS') {
+      throw new Error(NO_GAME_IN_PROGRESS_ERROR);
+    }
+    const response = await this._townController.sendInteractableCommand(this.id, {
+      type: 'ValidMoves',
+      gameID: instanceID,
+      row,
+      col,
+    });
+    return response.moves;
   }
 }

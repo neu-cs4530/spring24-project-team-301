@@ -267,7 +267,7 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | SpectateCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<ShogiMove> | EngineMoveCommand | StartGameCommand | LeaveGameCommand;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | SpectateCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<ShogiMove> | EngineMoveCommand | StartGameCommand | LeaveGameCommand | ValidMovesCommand;
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;
@@ -289,6 +289,14 @@ export interface StartGameCommand {
 export interface EngineMoveCommand {
   type: 'EngineMove';
   gameID: GameInstanceID;
+  depth: EngineDepth;
+}
+export type EngineDepth = 1 | 2 | 3 | 4 | 5;
+export interface ValidMovesCommand {
+  type: 'ValidMoves';
+  gameID: GameInstanceID;
+  row: ShogiIndex;
+  col: ShogiIndex;
 }
 export interface GameMoveCommand<MoveType> {
   type: 'GameMove';
@@ -301,6 +309,8 @@ export type InteractableCommandReturnType<CommandType extends InteractableComman
   CommandType extends ViewingAreaUpdateCommand ? undefined :
   CommandType extends GameMoveCommand<TicTacToeMove> ? undefined :
   CommandType extends LeaveGameCommand ? undefined :
+  CommandType extends ValidMovesCommand ? ShogiMove[] :
+  CommandType extends EngineMoveCommand ? undefined :
   never;
 
 export type InteractableCommandResponse<MessageType> = {
