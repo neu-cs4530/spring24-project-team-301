@@ -1,5 +1,4 @@
 import { Table, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
-
 import React, { useEffect } from 'react';
 import axios from 'axios';
 import { usePlayers } from '../../../classes/TownController';
