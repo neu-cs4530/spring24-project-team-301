@@ -7,7 +7,7 @@ import { ValidateError } from 'tsoa';
 import fs from 'fs/promises';
 import { Server as SocketServer } from 'socket.io';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc, increment, updateDoc } from 'firebase/firestore';
+import { doc, setDoc, increment, updateDoc, getDoc } from 'firebase/firestore';
 import { RegisterRoutes } from '../generated/routes';
 import TownsStore from './lib/TownsStore';
 import { ClientToServerEvents, ServerToClientEvents } from './types/CoveyTownSocket';
@@ -82,9 +82,30 @@ app.put('/win', async (_req: Express.Request, res: Express.Response) => {
   }
   return res.status(400).send('Invalid body');
 });
+app.get('/wins', async (_req: Express.Request, res: Express.Response) => {
+  const userEmail = _req.query.email;
+
+  if (userEmail && typeof userEmail === 'string') {
+    try {
+      const accountRef = doc(firestore, 'ShogiRecords', userEmail);
+      const accountSnapshot = await getDoc(accountRef);
+
+      if (!accountSnapshot.exists()) {
+        return res.status(404).send('User not found');
+      }
+
+      const winCount = accountSnapshot.data().win;
+
+      return res.status(200).json({ email: userEmail, wins: winCount });
+    } catch (e) {
+      return res.status(500).send('Failed to retrieve wins');
+    }
+  }
+  return res.status(400).send('Invalid query');
+});
 
 // user loss
-app.put('/loss', async (_req: Express.Request, res: Express.Response) => {
+app.put('/lose', async (_req: Express.Request, res: Express.Response) => {
   if (_req.body.email) {
     try {
       const accountRef = doc(firestore, 'ShogiRecords', _req.body.email);
@@ -95,6 +116,26 @@ app.put('/loss', async (_req: Express.Request, res: Express.Response) => {
     }
   }
   return res.status(400).send('Invalid body');
+});
+app.get('/losses', async (_req: Express.Request, res: Express.Response) => {
+  const userEmail = _req.query.email;
+  if (userEmail && typeof userEmail === 'string') {
+    try {
+      const accountRef = doc(firestore, 'ShogiRecords', userEmail);
+      const accountSnapshot = await getDoc(accountRef);
+
+      if (!accountSnapshot.exists()) {
+        return res.status(404).send('User not found');
+      }
+
+      const lossCount = accountSnapshot.data().loss;
+
+      return res.status(200).json({ email: userEmail, losses: lossCount });
+    } catch (e) {
+      return res.status(500).send('Failed to retrieve losses');
+    }
+  }
+  return res.status(400).send('Invalid query');
 });
 
 // user draw
@@ -109,6 +150,26 @@ app.put('/draw', async (_req: Express.Request, res: Express.Response) => {
     }
   }
   return res.status(400).send('Invalid body');
+});
+app.get('/draws', async (_req: Express.Request, res: Express.Response) => {
+  const userEmail = _req.query.email;
+  if (userEmail && typeof userEmail === 'string') {
+    try {
+      const accountRef = doc(firestore, 'ShogiRecords', userEmail);
+      const accountSnapshot = await getDoc(accountRef);
+
+      if (!accountSnapshot.exists()) {
+        return res.status(404).send('User not found');
+      }
+
+      const drawCount = accountSnapshot.data().draw;
+
+      return res.status(200).json({ email: userEmail, draws: drawCount });
+    } catch (e) {
+      return res.status(500).send('Failed to retrieve draws');
+    }
+  }
+  return res.status(400).send('Invalid query');
 });
 
 // Register the TownsController routes with the express server

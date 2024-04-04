@@ -46,6 +46,63 @@ export default function ShogiArea({
 
   const toast = useToast();
 
+  const [blackRecord, setBlackRecord] = useState({ wins: 0, losses: 0, draws: 0 });
+  const [whiteRecord, setWhiteRecord] = useState({ wins: 0, losses: 0, draws: 0 });
+  const [isLoadingBlackRecord, setIsLoadingBlackRecord] = useState(false);
+  const [isLoadingWhiteRecord, setIsLoadingWhiteRecord] = useState(false);
+
+  const fetchRecords = async (email: string) => {
+    setIsLoadingBlackRecord(true);
+    setIsLoadingWhiteRecord(true);
+    try {
+      const [resWins, resLosses, resDraws] = await Promise.all([
+        axios.get(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/wins?email=${email}`),
+        axios.get(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/losses?email=${email}`),
+        axios.get(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/draws?email=${email}`),
+      ]);
+      return {
+        wins: resWins.data.wins,
+        losses: resLosses.data.losses,
+        draws: resDraws.data.draws,
+      };
+    } catch (error) {
+      console.error('Error fetching records:', error);
+      return { wins: 0, losses: 0, draws: 0 };
+    }
+  };
+
+  const fetchAndUpdateRecords = async () => {
+    if (black && white) {
+      const [newBlackRecord, newWhiteRecord] = await Promise.all([
+        fetchRecords(black?.userName || ''),
+        fetchRecords(white?.userName || ''),
+      ]);
+
+      setBlackRecord(newBlackRecord);
+      setWhiteRecord(newWhiteRecord);
+
+      setIsLoadingBlackRecord(false);
+      setIsLoadingWhiteRecord(false);
+    } else if (white) {
+      const newWhiteRecord = await fetchRecords(white?.userName || '');
+      setWhiteRecord(newWhiteRecord);
+
+      setIsLoadingWhiteRecord(false);
+    } else if (black) {
+      const newBlackRecord = await fetchRecords(black?.userName || '');
+      setBlackRecord(newBlackRecord);
+
+      setIsLoadingBlackRecord(false);
+    }
+  };
+
+  useEffect(() => {
+    if (gameStatus === 'WAITING_TO_START' || gameStatus === 'WAITING_FOR_PLAYERS') {
+      fetchAndUpdateRecords();
+    }
+    return () => {};
+  }, [gameStatus, black, white]);
+
   // maintain player timers
   useEffect(() => {
     const timer = setInterval(() => {
@@ -108,27 +165,28 @@ export default function ShogiArea({
     gameAreaController.addListener('gameUpdated', updateGameState);
     const onGameEnd = async () => {
       const winner = gameAreaController.winner;
-      if (!winner) {
-        toast({
-          title: 'Game over',
-          description: 'Game ended in a tie',
-          status: 'info',
-        });
-        console.log('Game ended in a tie');
-        const body = {
-          email: townController.ourPlayer?.userName,
-        };
-        const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/draw`, body);
-        console.log(res);
-        if (res.status !== 200) {
-          throw new Error('Failed to register draw');
-        }
-        console.log('Record updates successful');
-      } else if (winner === townController.ourPlayer) {
-        // if black and white exist
-        if (black && white) {
+      if (townController.ourPlayer === black || townController.ourPlayer === white) {
+        if (!winner) {
           toast({
             title: 'Game over',
+            description: 'Game ended in a tie',
+            status: 'info',
+          });
+          console.log('Game ended in a tie');
+          const body = {
+            email: townController.ourPlayer?.userName,
+          };
+          const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/draw`, body);
+          console.log(res);
+          if (res.status !== 200) {
+            throw new Error('Failed to register draw');
+          }
+          console.log('Record updates successful');
+          await fetchAndUpdateRecords();
+        } else if (winner === townController.ourPlayer) {
+          const title = black && white ? 'Game over' : 'Game over (opponent left)';
+          toast({
+            title,
             description: 'You won!',
             status: 'success',
           });
@@ -142,30 +200,32 @@ export default function ShogiArea({
             throw new Error('Failed to register win');
           }
           console.log('Record updates successful');
+          await fetchAndUpdateRecords();
         } else {
           toast({
-            title: 'Opponent left',
-            description: 'Game has ended',
-            status: 'info',
+            title: 'Game over',
+            description: `You lost :(`,
+            status: 'error',
           });
-          console.log('Opponent left, game ended');
+          console.log('You lost :(');
+          const body = {
+            email: townController.ourPlayer?.userName,
+          };
+          const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/lose`, body);
+          console.log(res);
+          if (res.status !== 200) {
+            throw new Error('Failed to register loss');
+          }
+          console.log('Record updates successful');
+          await fetchAndUpdateRecords();
         }
       } else {
         toast({
           title: 'Game over',
-          description: `You lost :(`,
-          status: 'error',
+          description: winner ? `${winner.userName} won!` : 'Game ended in a draw',
+          status: 'info',
         });
-        console.log('You lost :(');
-        const body = {
-          email: townController.ourPlayer?.userName,
-        };
-        const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/loss`, body);
-        console.log(res);
-        if (res.status !== 200) {
-          throw new Error('Failed to register loss');
-        }
-        console.log('Record updates successful');
+        await fetchAndUpdateRecords();
       }
     };
     gameAreaController.addListener('gameEnd', onGameEnd);
@@ -173,7 +233,7 @@ export default function ShogiArea({
       gameAreaController.removeListener('gameUpdated', updateGameState);
       gameAreaController.removeListener('gameEnd', onGameEnd);
     };
-  }, [townController, gameAreaController, toast, gameStatus]);
+  }, [townController, gameAreaController, toast, gameStatus, black, white]);
   let gameStatusText = <></>;
   if (gameStatus === 'IN_PROGRESS') {
     gameStatusText = (
@@ -241,7 +301,21 @@ export default function ShogiArea({
     );
   }
   let blackTimer = '';
+  let blackRecordText = '';
   let whiteTimer = '';
+  let whiteRecordText = '';
+  if (black) {
+    blackRecordText =
+      isLoadingBlackRecord && gameStatus !== 'OVER'
+        ? '...'
+        : `(${blackRecord.wins}-${blackRecord.losses}-${blackRecord.draws})`;
+  }
+  if (white) {
+    whiteRecordText =
+      isLoadingWhiteRecord && gameStatus !== 'OVER'
+        ? '...'
+        : `(${whiteRecord.wins}-${whiteRecord.losses}-${whiteRecord.draws})`;
+  }
   if (gameStatus === 'WAITING_TO_START' || gameStatus === 'IN_PROGRESS') {
     blackTimer = formatTime(blackTime);
     whiteTimer = formatTime(whiteTime);
@@ -251,11 +325,13 @@ export default function ShogiArea({
       {gameStatusText}
       <List aria-label='list of players in the game'>
         <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <div>Black: {black?.userName || '(No player yet!)'}</div>
+          <div>Black: {black?.userName || '(waiting for player)'}</div>
+          <div>{blackRecordText}</div>
           <div style={{ paddingRight: '35px' }}>{blackTimer}</div>
         </ListItem>
         <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <div>White: {white?.userName || '(No player yet!)'}</div>
+          <div>White: {white?.userName || '(waiting for player)'}</div>
+          <div>{whiteRecordText}</div>
           <div style={{ paddingRight: '35px' }}>{whiteTimer}</div>
         </ListItem>
       </List>

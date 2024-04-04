@@ -15,6 +15,7 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  useToast,
 } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { GenericGameAreaController } from '../../../classes/interactable/GameAreaController';
@@ -28,6 +29,8 @@ import GameAreaInteractable from './GameArea';
 import Leaderboard from './Leaderboard';
 import TicTacToeArea from './TicTacToe/TicTacToeArea';
 import ShogiArea from './Shogi/ShogiArea';
+import axios from 'axios';
+import ShogiLeaderboard from './ShogiLeaderboard';
 
 export const INVALID_GAME_AREA_TYPE_MESSAGE = 'Invalid game area type';
 
@@ -51,6 +54,7 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
   const townController = useTownController();
   const [history, setHistory] = useState<GameResult[]>(gameAreaController.history);
   const [observers, setObservers] = useState<PlayerController[]>(gameAreaController.observers);
+
   useEffect(() => {
     const updateGameState = () => {
       setHistory(gameAreaController.history);
@@ -61,6 +65,7 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
       gameAreaController.removeListener('gameUpdated', updateGameState);
     };
   }, [townController, gameAreaController]);
+
   return (
     <>
       <Accordion allowToggle>
@@ -73,7 +78,11 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
               <AccordionIcon />
             </AccordionButton>
             <AccordionPanel>
-              <Leaderboard results={history} />
+              {gameAreaController.toInteractableAreaModel().type === 'ShogiArea' ? (
+                <ShogiLeaderboard />
+              ) : (
+                <Leaderboard results={history} />
+              )}
             </AccordionPanel>
           </Heading>
         </AccordionItem>
@@ -132,15 +141,38 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
  *
  */
 export default function GameAreaWrapper(): JSX.Element {
+  const toast = useToast();
+
   const gameArea = useInteractable<GameAreaInteractable>('gameArea');
   const townController = useTownController();
-  const closeModal = useCallback(() => {
+  const closeModal = useCallback(async () => {
     if (gameArea) {
       townController.interactEnd(gameArea);
       const controller = townController.getGameAreaController(gameArea);
       controller.leaveGame();
+      if (
+        controller.toInteractableAreaModel().type === 'ShogiArea' &&
+        controller.toInteractableAreaModel().game?.state.status === 'IN_PROGRESS'
+      ) {
+        // update record + display loss modal
+        toast({
+          title: 'Game over (you left)',
+          description: `You lost :(`,
+          status: 'error',
+        });
+        console.log('You leave = you lose');
+        const body = {
+          email: townController.ourPlayer?.userName,
+        };
+        const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/lose`, body);
+        console.log(res);
+        if (res.status !== 200) {
+          throw new Error('Failed to register loss');
+        }
+        console.log('Record updates successful');
+      }
     }
-  }, [townController, gameArea]);
+  }, [gameArea, townController, toast]);
   if (gameArea) {
     return (
       <Modal isOpen={true} onClose={closeModal} closeOnOverlayClick={false} size='xl'>
