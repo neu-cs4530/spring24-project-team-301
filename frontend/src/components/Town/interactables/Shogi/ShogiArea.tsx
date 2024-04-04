@@ -165,57 +165,66 @@ export default function ShogiArea({
     gameAreaController.addListener('gameUpdated', updateGameState);
     const onGameEnd = async () => {
       const winner = gameAreaController.winner;
-      if (!winner) {
-        toast({
-          title: 'Game over',
-          description: 'Game ended in a tie',
-          status: 'info',
-        });
-        console.log('Game ended in a tie');
-        const body = {
-          email: townController.ourPlayer?.userName,
-        };
-        const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/draw`, body);
-        console.log(res);
-        if (res.status !== 200) {
-          throw new Error('Failed to register draw');
+      if (townController.ourPlayer === black || townController.ourPlayer === white) {
+        if (!winner) {
+          toast({
+            title: 'Game over',
+            description: 'Game ended in a tie',
+            status: 'info',
+          });
+          console.log('Game ended in a tie');
+          const body = {
+            email: townController.ourPlayer?.userName,
+          };
+          const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/draw`, body);
+          console.log(res);
+          if (res.status !== 200) {
+            throw new Error('Failed to register draw');
+          }
+          console.log('Record updates successful');
+          await fetchAndUpdateRecords();
+        } else if (winner === townController.ourPlayer) {
+          const title = black && white ? 'Game over' : 'Game over (opponent left)';
+          toast({
+            title,
+            description: 'You won!',
+            status: 'success',
+          });
+          console.log('You won!');
+          const body = {
+            email: townController.ourPlayer?.userName,
+          };
+          const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/win`, body);
+          console.log(res);
+          if (res.status !== 200) {
+            throw new Error('Failed to register win');
+          }
+          console.log('Record updates successful');
+          await fetchAndUpdateRecords();
+        } else {
+          toast({
+            title: 'Game over',
+            description: `You lost :(`,
+            status: 'error',
+          });
+          console.log('You lost :(');
+          const body = {
+            email: townController.ourPlayer?.userName,
+          };
+          const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/lose`, body);
+          console.log(res);
+          if (res.status !== 200) {
+            throw new Error('Failed to register loss');
+          }
+          console.log('Record updates successful');
+          await fetchAndUpdateRecords();
         }
-        console.log('Record updates successful');
-        await fetchAndUpdateRecords();
-      } else if (winner === townController.ourPlayer) {
-        const title = black && white ? 'Game over' : 'Game over (opponent left)';
-        toast({
-          title,
-          description: 'You won!',
-          status: 'success',
-        });
-        console.log('You won!');
-        const body = {
-          email: townController.ourPlayer?.userName,
-        };
-        const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/win`, body);
-        console.log(res);
-        if (res.status !== 200) {
-          throw new Error('Failed to register win');
-        }
-        console.log('Record updates successful');
-        await fetchAndUpdateRecords();
       } else {
         toast({
           title: 'Game over',
-          description: `You lost :(`,
-          status: 'error',
+          description: winner ? `${winner.userName} won!` : 'Game ended in a draw',
+          status: 'info',
         });
-        console.log('You lost :(');
-        const body = {
-          email: townController.ourPlayer?.userName,
-        };
-        const res = await axios.put(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/lose`, body);
-        console.log(res);
-        if (res.status !== 200) {
-          throw new Error('Failed to register loss');
-        }
-        console.log('Record updates successful');
         await fetchAndUpdateRecords();
       }
     };

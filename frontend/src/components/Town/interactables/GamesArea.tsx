@@ -30,6 +30,7 @@ import Leaderboard from './Leaderboard';
 import TicTacToeArea from './TicTacToe/TicTacToeArea';
 import ShogiArea from './Shogi/ShogiArea';
 import axios from 'axios';
+import ShogiLeaderboard from './ShogiLeaderboard';
 
 export const INVALID_GAME_AREA_TYPE_MESSAGE = 'Invalid game area type';
 
@@ -53,6 +54,7 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
   const townController = useTownController();
   const [history, setHistory] = useState<GameResult[]>(gameAreaController.history);
   const [observers, setObservers] = useState<PlayerController[]>(gameAreaController.observers);
+
   useEffect(() => {
     const updateGameState = () => {
       setHistory(gameAreaController.history);
@@ -63,11 +65,24 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
       gameAreaController.removeListener('gameUpdated', updateGameState);
     };
   }, [townController, gameAreaController]);
+
   return (
     <>
       <Accordion allowToggle>
         {gameAreaController.toInteractableAreaModel().type === 'ShogiArea' ? (
-          <></>
+          <AccordionItem>
+            <Heading as='h3'>
+              <AccordionButton>
+                <Box flex='1' textAlign='left'>
+                  Leaderboard
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+              <AccordionPanel>
+                <ShogiLeaderboard />
+              </AccordionPanel>
+            </Heading>
+          </AccordionItem>
         ) : (
           <AccordionItem>
             <Heading as='h3'>
