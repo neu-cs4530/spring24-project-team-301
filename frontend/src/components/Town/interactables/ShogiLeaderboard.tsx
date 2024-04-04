@@ -33,6 +33,7 @@ export default function ShogiLeaderboard(): JSX.Element {
       });
       const newRecords: ShogiRecord[] = await Promise.all(allStatsPromises);
 
+      // LEADERBOARD RANKING LOGIC: sort by wins descending, settle ties by losses ascending (draws do not matter). If two players have the same wins and losses, they receive the same rank
       newRecords.sort((a, b) => {
         // more wins better
         if (a.wins !== b.wins) return b.wins - a.wins;
@@ -41,17 +42,18 @@ export default function ShogiLeaderboard(): JSX.Element {
         return 0;
       });
 
-      let currentRank = 1; // Start ranking at 1
+      let currentRank = 1;
       let prevWins = newRecords[0].wins;
-      let prevLosses = newRecords[0].losses; // Initialize with the first record
+      let prevLosses = newRecords[0].losses;
       const recordsWithRank: ShogiRecordWithRank[] = newRecords.map((record, index) => {
         if (index !== 0) {
-          // Skip the first record as it's already correctly initialized
+          // compare current record with previous and assign a rank
           if (record.wins === prevWins && record.losses === prevLosses) {
-            // If wins and losses match the previous record, the rank stays the same
+            // same as previous rank
           } else {
-            currentRank = index + 1; // Update rank based on the current position
-            prevWins = record.wins; // Update tracking variables
+            // lower rank
+            currentRank = index + 1;
+            prevWins = record.wins;
             prevLosses = record.losses;
           }
         }
