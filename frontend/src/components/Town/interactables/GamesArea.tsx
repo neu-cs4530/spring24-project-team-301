@@ -69,35 +69,23 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
   return (
     <>
       <Accordion allowToggle>
-        {gameAreaController.toInteractableAreaModel().type === 'ShogiArea' ? (
-          <AccordionItem>
-            <Heading as='h3'>
-              <AccordionButton>
-                <Box flex='1' textAlign='left'>
-                  Leaderboard
-                </Box>
-                <AccordionIcon />
-              </AccordionButton>
-              <AccordionPanel>
+        <AccordionItem>
+          <Heading as='h3'>
+            <AccordionButton>
+              <Box flex='1' textAlign='left'>
+                Leaderboard
+              </Box>
+              <AccordionIcon />
+            </AccordionButton>
+            <AccordionPanel>
+              {gameAreaController.toInteractableAreaModel().type === 'ShogiArea' ? (
                 <ShogiLeaderboard />
-              </AccordionPanel>
-            </Heading>
-          </AccordionItem>
-        ) : (
-          <AccordionItem>
-            <Heading as='h3'>
-              <AccordionButton>
-                <Box flex='1' textAlign='left'>
-                  Leaderboard
-                </Box>
-                <AccordionIcon />
-              </AccordionButton>
-              <AccordionPanel>
+              ) : (
                 <Leaderboard results={history} />
-              </AccordionPanel>
-            </Heading>
-          </AccordionItem>
-        )}
+              )}
+            </AccordionPanel>
+          </Heading>
+        </AccordionItem>
         <AccordionItem>
           <Heading as='h3'>
             <AccordionButton>
