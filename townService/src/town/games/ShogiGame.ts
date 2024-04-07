@@ -46,7 +46,10 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
    * @param player The player who is ready to start the game
    */
   public startGame(player: Player): void {
-    if (this.state.status !== 'WAITING_TO_START') {
+    if (
+      this.state.status !== 'WAITING_TO_START' &&
+      !((!this.state.black || !this.state.white) && this.state.status === 'WAITING_FOR_PLAYERS')
+    ) {
       throw new InvalidParametersError(GAME_NOT_STARTABLE_MESSAGE);
     }
     if (this.state.black !== player.id && this.state.white !== player.id) {
@@ -58,10 +61,15 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     if (this.state.white === player.id) {
       this.state.whiteReady = true;
     }
-    this.state = {
-      ...this.state,
-      status: this.state.blackReady && this.state.whiteReady ? 'IN_PROGRESS' : 'WAITING_TO_START',
-    };
+    if (!this.state.black || !this.state.white) {
+      this.state.status = 'IN_PROGRESS';
+      this.state.engine = true;
+    } else {
+      this.state = {
+        ...this.state,
+        status: this.state.blackReady && this.state.whiteReady ? 'IN_PROGRESS' : 'WAITING_TO_START',
+      };
+    }
   }
 
   /**
@@ -733,7 +741,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
    * https://en.wikipedia.org/wiki/Negamax
    * @returns The move for the engine to make.
    */
-  public getEngineMove(depth: number): ShogiMove {
+  public engineMove(depth: number): void {
     const allMoves = this.getAllValidMoves();
     const bestMove: ShogiMove = allMoves[0];
     let bestValue = -Infinity;
@@ -747,7 +755,23 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
         bestMove.promotion = move.promotion;
       }
     }
-    return bestMove;
+    const board = this._board;
+    if (board[bestMove.to.row][bestMove.to.col] !== ' ') {
+      const inhand = this.state.inhand + board[bestMove.to.row][bestMove.to.col];
+      this.state = {
+        ...this.state,
+        inhand,
+      };
+    }
+    board[bestMove.to.row][bestMove.to.col] = bestMove.promotion
+      ? `+${board[bestMove.from.row][bestMove.from.col]}`
+      : board[bestMove.from.row][bestMove.from.col];
+    board[bestMove.from.row][bestMove.from.col] = ' ';
+    this.state = {
+      ...this.state,
+      sfen: this._boardToSfen(board),
+      numMoves: this.state.numMoves + 1,
+    };
   }
 
   private _negamax(board: string[][], depth: number): number {

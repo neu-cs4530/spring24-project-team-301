@@ -129,7 +129,7 @@ export default class ShogiGameArea extends GameArea<ShogiGame> {
       if (this._game?.id !== command.gameID) {
         throw new InvalidParametersError(GAME_ID_MISSMATCH_MESSAGE);
       }
-      game.getEngineMove(command.depth);
+      game.engineMove(command.depth);
       this._stateUpdated(game.toModel());
       return undefined as InteractableCommandReturnType<CommandType>;
     }
