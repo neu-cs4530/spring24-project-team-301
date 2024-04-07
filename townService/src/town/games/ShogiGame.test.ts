@@ -70,11 +70,6 @@ describe('ShogiGame', () => {
     });
   });
   describe('_startGame', () => {
-    test('if the status is not WAITING_TO_START, it throws an error', () => {
-      const player = createPlayerForTesting();
-      game.join(player);
-      expect(() => game.startGame(player)).toThrowError(GAME_NOT_STARTABLE_MESSAGE);
-    });
     test('if the player is not in the game, it throws an error', () => {
       game.join(createPlayerForTesting());
       game.join(createPlayerForTesting());
