@@ -48,7 +48,6 @@ function createBoardFromSfen(sfen: string): ShogiCell[][] {
       }
     }
   }
-  console.log(board);
 
   return board;
 }
@@ -73,7 +72,7 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
   }
 
   /**
-   * Returns the player with the 'Red' game piece, if there is one, or undefined otherwise
+   * Returns the player with the 'White' game piece, if there is one, or undefined otherwise
    */
   get white(): PlayerController | undefined {
     const white = this._model.game?.state.white;
@@ -84,7 +83,7 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
   }
 
   /**
-   * Returns the player with the 'Yellow' game piece, if there is one, or undefined otherwise
+   * Returns the player with the 'Black' game piece, if there is one, or undefined otherwise
    */
   get black(): PlayerController | undefined {
     const black = this._model.game?.state.black;
@@ -117,6 +116,10 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
    */
   get isOurTurn(): boolean {
     return this.whoseTurn?.id === this._townController.ourPlayer.id;
+  }
+
+  get isBlack(): boolean {
+    return this._townController.ourPlayer.id === this.black?.id;
   }
 
   /**
