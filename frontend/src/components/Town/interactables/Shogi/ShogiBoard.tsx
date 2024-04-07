@@ -100,7 +100,6 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
     const key: keyof ShogiPieces = (piece[0] === '+'
       ? 'p'.concat(piece[1].toUpperCase())
       : piece.toUpperCase()) as unknown as keyof ShogiPieces;
-    console.log(shogiPiecePhotos[key]);
     return shogiPiecePhotos[key];
   }
 
