@@ -55,7 +55,6 @@ const StyledShogiBoard = chakra(Container, {
 });
 const StyledShogiSquare = chakra(Button, {
   baseStyle: {
-    backgroundColor: '#deb887',
     borderRadius: '0px',
     justifyContent: 'center',
     width: '40px',
@@ -103,24 +102,24 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
     return shogiPiecePhotos[key];
   }
 
-  // function isOurPiece(row: number, col: number): boolean {
-  //   const piece =
-  //     board[row][col]?.charAt(0) === '+' ? board[row][col]?.charAt(1) : board[row][col]?.charAt(0);
-  //   console.log(piece);
-  //   if (gameAreaController.isBlack) {
-  //     if (piece?.toLowerCase() !== piece) {
-  //       return true;
-  //     } else {
-  //       return false;
-  //     }
-  //   } else {
-  //     if (piece?.toUpperCase() !== piece) {
-  //       return true;
-  //     } else {
-  //       return false;
-  //     }
-  //   }
-  // }
+  function isOurPiece(row: number, col: number): boolean {
+    const piece =
+      board[row][col]?.charAt(0) === '+' ? board[row][col]?.charAt(1) : board[row][col]?.charAt(0);
+    console.log(piece);
+    if (gameAreaController.isBlack) {
+      if (piece?.toLowerCase() !== piece) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      if (piece?.toUpperCase() !== piece) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
 
   useEffect(() => {
     gameAreaController.addListener('turnChanged', setIsOurTurn);
@@ -136,14 +135,15 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
         return row.map((cell, colIndex) => {
           return (
             <StyledShogiSquare
+              style={{ backgroundColor: '#deb887' }}
               key={`${rowIndex}.${colIndex}`}
               onClick={async () => {
                 if (from.row !== -1 && !(from.row === rowIndex && from.col === colIndex)) {
                   try {
                     await gameAreaController.makeMove(
-                      from.row as ShogiIndex,
+                      (gameAreaController.isBlack ? from.row : 8 - from.row) as ShogiIndex,
                       from.col as ShogiIndex,
-                      rowIndex as ShogiIndex,
+                      (gameAreaController.isBlack ? rowIndex : 8 - rowIndex) as ShogiIndex,
                       colIndex as ShogiIndex,
                     );
                     setFrom({
@@ -184,7 +184,10 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
                   layout='fill'
                   unoptimized
                   quality={10}
-                  src={getLine(board[rowIndex][colIndex] as string)}></Image>
+                  src={getLine(board[rowIndex][colIndex] as string)}
+                  style={
+                    !isOurPiece(rowIndex, colIndex) ? { transform: 'rotate(180deg)' } : {}
+                  }></Image>
               ) : null}
             </StyledShogiSquare>
           );
