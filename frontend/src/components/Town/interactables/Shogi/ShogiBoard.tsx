@@ -9,24 +9,60 @@ import Image from 'next/image';
 export type ShogiGameProps = {
   gameAreaController: ShogiAreaController;
 };
+
+type ShogiPieces = {
+  K: string;
+  R: string;
+  pR: string;
+  B: string;
+  pB: string;
+  G: string;
+  S: string;
+  pS: string;
+  N: string;
+  pN: string;
+  L: string;
+  pL: string;
+  P: string;
+  pP: string;
+};
+
+const shogiPiecePhotos: ShogiPieces = {
+  K: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Shogi_osho%28svg%29.svg/70px-Shogi_osho%28svg%29.svg.png',
+  R: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Shogi_hisha%28svg%29.svg/70px-Shogi_hisha%28svg%29.svg.png',
+  pR: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Shogi_ryuo%28svg%29.svg/70px-Shogi_ryuo%28svg%29.svg.png',
+  B: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Shogi_kakugyo%28svg%29.svg/70px-Shogi_kakugyo%28svg%29.svg.png',
+  pB: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Shogi_ryuma%28svg%29.svg/70px-Shogi_ryuma%28svg%29.svg.png',
+  G: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Shogi_kinsho%28svg%29.svg/70px-Shogi_kinsho%28svg%29.svg.png',
+  S: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Shogi_ginsho%28svg%29.svg/70px-Shogi_ginsho%28svg%29.svg.png',
+  pS: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Shogi_narigin%28svg%29.svg/70px-Shogi_narigin%28svg%29.svg.png',
+  N: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Shogi_keima.svg/70px-Shogi_keima.svg.png',
+  pN: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Shogi_narikei%28svg%29.svg/70px-Shogi_narikei%28svg%29.svg.png',
+  L: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Shogi_kyosha%28svg%29.svg/70px-Shogi_kyosha%28svg%29.svg.png',
+  pL: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Shogi_narikyo%28svg%29.svg/70px-Shogi_narikyo%28svg%29.svg.png',
+  P: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Shogi_fuhyo%28svg%29.svg/70px-Shogi_fuhyo%28svg%29.svg.png',
+  pP: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Shogi_tokin%28svg%29.svg/70px-Shogi_tokin%28svg%29.svg.png',
+};
 const StyledShogiBoard = chakra(Container, {
   baseStyle: {
     display: 'flex',
+    alignContent: 'flex-start',
     width: '400px',
     height: '400px',
-    padding: '5px',
+    padding: '4px',
     flexWrap: 'wrap',
   },
 });
 const StyledShogiSquare = chakra(Button, {
   baseStyle: {
+    backgroundColor: '#deb887',
+    borderRadius: '0px',
     justifyContent: 'center',
     width: '40px',
     height: '40px',
     alignItems: 'center',
     flexBasis: 'auto',
     border: '1px solid black',
-    fontSize: '50px',
     _disabled: {
       opacity: '100%',
     },
@@ -59,6 +95,34 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
   const [isOurTurn, setIsOurTurn] = useState(gameAreaController.isOurTurn);
   const [from, setFrom] = useState({ row: -1, col: -1 });
   const toast = useToast();
+
+  function getLine(piece: string): string {
+    const key: keyof ShogiPieces = (piece[0] === '+'
+      ? 'p'.concat(piece[1].toUpperCase())
+      : piece.toUpperCase()) as unknown as keyof ShogiPieces;
+    console.log(shogiPiecePhotos[key]);
+    return shogiPiecePhotos[key];
+  }
+
+  // function isOurPiece(row: number, col: number): boolean {
+  //   const piece =
+  //     board[row][col]?.charAt(0) === '+' ? board[row][col]?.charAt(1) : board[row][col]?.charAt(0);
+  //   console.log(piece);
+  //   if (gameAreaController.isBlack) {
+  //     if (piece?.toLowerCase() !== piece) {
+  //       return true;
+  //     } else {
+  //       return false;
+  //     }
+  //   } else {
+  //     if (piece?.toUpperCase() !== piece) {
+  //       return true;
+  //     } else {
+  //       return false;
+  //     }
+  //   }
+  // }
+
   useEffect(() => {
     gameAreaController.addListener('turnChanged', setIsOurTurn);
     gameAreaController.addListener('boardChanged', setBoard);
@@ -98,7 +162,10 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
                       col: -1,
                     });
                   }
-                } else if (from.row === rowIndex && from.row === colIndex) {
+                } else if (
+                  (from.row === rowIndex && from.row === colIndex) ||
+                  (board[rowIndex][colIndex] === ' ' && board[rowIndex][colIndex] === undefined)
+                ) {
                   setFrom({
                     row: -1,
                     col: -1,
@@ -117,9 +184,7 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
                 <Image
                   layout='fill'
                   quality={10}
-                  src={'/shogi/'
-                    .concat(board[rowIndex][colIndex]?.toUpperCase() as string)
-                    .concat('.png')}></Image>
+                  src={getLine(board[rowIndex][colIndex] as string)}></Image>
               ) : null}
             </StyledShogiSquare>
           );
