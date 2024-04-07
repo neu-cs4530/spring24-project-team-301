@@ -26,39 +26,11 @@ export const SHOGI_ROWS = 9;
 export const SHOGI_COLS = 9;
 export const COLUMN_FULL_MESSAGE = 'The column is full';
 
-function createBoardFromSfen(sfen: string): ShogiCell[][] {
-  const ranks = sfen.split(' ')[0].split('/');
-  const board = new Array(9).fill(' ').map(() => new Array(9).fill(' '));
-
-  for (let i = 0; i < ranks.length; i++) {
-    const rank = ranks[i];
-    let file = 0;
-    for (let j = 0; j < rank.length; j++) {
-      const char = rank[j];
-      if (Number.isNaN(parseInt(char, 10))) {
-        if (char === '+') {
-          board[i][file] = char + rank[j + 1];
-          j++;
-          file++;
-        } else {
-          board[i][file] = char;
-          file++;
-        }
-      } else {
-        file += parseInt(char, 10);
-      }
-    }
-  }
-  console.log(board);
-
-  return board;
-}
-
 /**
  * This class is responsible for managing the state of the Connect Four game, and for sending commands to the server
  */
 export default class ShogiAreaController extends GameAreaController<ShogiGameState, ShogiEvents> {
-  protected _board: ShogiCell[][] = createBoardFromSfen(
+  protected _board: ShogiCell[][] = this.createBoardFromSfen(
     'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL',
   );
   protected _engine = false;
@@ -75,7 +47,7 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
   }
 
   /**
-   * Returns the player with the 'Red' game piece, if there is one, or undefined otherwise
+   * Returns the player with the 'White' game piece, if there is one, or undefined otherwise
    */
   get white(): PlayerController | undefined {
     const white = this._model.game?.state.white;
@@ -86,7 +58,7 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
   }
 
   /**
-   * Returns the player with the 'Yellow' game piece, if there is one, or undefined otherwise
+   * Returns the player with the 'Black' game piece, if there is one, or undefined otherwise
    */
   get black(): PlayerController | undefined {
     const black = this._model.game?.state.black;
@@ -119,6 +91,10 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
    */
   get isOurTurn(): boolean {
     return this.whoseTurn?.id === this._townController.ourPlayer.id;
+  }
+
+  get isBlack(): boolean {
+    return this._townController.ourPlayer.id === this.black?.id;
   }
 
   /**
@@ -185,35 +161,31 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
     return !this.isEmpty() && this.status !== 'WAITING_FOR_PLAYERS';
   }
 
-  /**
-   * Translates a 2D array to sfen
-   */
-  private _boardToSfen(board: string[][]): string {
-    let sfen = '';
-    for (let i = 0; i < board.length; i++) {
-      let rank = '';
-      let empty = 0;
-      for (let j = 0; j < board[i].length; j++) {
-        const char = board[i][j];
-        if (char === ' ') {
-          empty++;
-        } else {
-          if (empty > 0) {
-            rank += empty;
-            empty = 0;
+  public createBoardFromSfen(sfen: string): ShogiCell[][] {
+    const ranks = sfen.split(' ')[0].split('/');
+    const board = new Array(9).fill(' ').map(() => new Array(9).fill(' '));
+
+    for (let i = 0; i < ranks.length; i++) {
+      const rank = ranks[i];
+      let file = 0;
+      for (let j = 0; j < rank.length; j++) {
+        const char = rank[j];
+        if (Number.isNaN(parseInt(char, 10))) {
+          if (char === '+') {
+            board[i][file] = char + rank[j + 1];
+            j++;
+            file++;
+          } else {
+            board[i][file] = char;
+            file++;
           }
-          rank += char;
+        } else {
+          file += parseInt(char, 10);
         }
       }
-      if (empty > 0) {
-        rank += empty;
-      }
-      sfen += rank;
-      if (i < board.length - 1) {
-        sfen += '/';
-      }
     }
-    return sfen;
+
+    return this.isActive() ? (this.isBlack ? board : board.reverse()) : board;
   }
 
   /**
@@ -233,7 +205,7 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
     super._updateFrom(newModel);
     const newGame = newModel.game;
     if (newGame) {
-      const newBoard = createBoardFromSfen(newGame.state.sfen);
+      const newBoard = this.createBoardFromSfen(newGame.state.sfen);
       if (!_.isEqual(newBoard, this._board)) {
         this._board = newBoard;
         this.emit('boardChanged', this._board);
