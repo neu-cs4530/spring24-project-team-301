@@ -182,6 +182,7 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
               {board[rowIndex][colIndex] !== ' ' && board[rowIndex][colIndex] !== undefined ? (
                 <Image
                   layout='fill'
+                  unoptimized
                   quality={10}
                   src={getLine(board[rowIndex][colIndex] as string)}></Image>
               ) : null}
