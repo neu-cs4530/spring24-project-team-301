@@ -48,8 +48,7 @@ const StyledShogiBoard = chakra(Container, {
   baseStyle: {
     display: 'flex',
     alignContent: 'flex-start',
-    width: '400px',
-    height: '400px',
+    width: '100%',
     padding: '4px',
     flexWrap: 'wrap',
   },
@@ -58,8 +57,8 @@ const StyledShogiSquare = chakra(Button, {
   baseStyle: {
     borderRadius: '0px',
     justifyContent: 'center',
-    width: '40px',
-    height: '40px',
+    width: '60px',
+    height: '60px',
     alignItems: 'center',
     flexBasis: 'auto',
     border: '1px solid black',
@@ -201,7 +200,7 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
     for (let i = 1; i <= 8 - col; i++) {
       if (_canCapture(p, row, col + i)) {
         setAvailable(prev => [...prev, { row: row, col: (col + i) as ShogiIndex }]);
-        if (board[row][col - i] !== ' ') {
+        if (board[row][col + i] !== ' ') {
           break;
         }
       } else {
@@ -487,7 +486,7 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
                 <Image
                   layout='fill'
                   unoptimized
-                  quality={10}
+                  quality={25}
                   src={getLine(board[rowIndex][colIndex] as string)}
                   style={
                     !isOurPiece(rowIndex, colIndex) ? { transform: 'rotate(180deg)' } : {}

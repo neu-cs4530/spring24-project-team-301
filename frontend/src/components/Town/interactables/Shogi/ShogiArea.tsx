@@ -1,4 +1,4 @@
-import { Button, List, ListItem, useToast } from '@chakra-ui/react';
+import { Box, Button, Center, Flex, Heading, List, ListItem, useToast } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import ShogiAreaController from '../../../../classes/interactable/ShogiAreaController';
 import PlayerController from '../../../../classes/PlayerController';
@@ -292,6 +292,7 @@ export default function ShogiArea({
   } else {
     const joinGameButton = (
       <Button
+        float={'right'}
         onClick={async () => {
           setJoiningGame(true);
           try {
@@ -339,8 +340,15 @@ export default function ShogiArea({
     blackTimer = formatTime(blackTime);
     whiteTimer = formatTime(whiteTime);
   }
+  function YourSide(): JSX.Element {
+    return (
+      <Heading as='h4' display={'block'}>
+        {gameAreaController.isBlack ? 'Black' : 'White'}
+      </Heading>
+    );
+  }
   return (
-    <>
+    <Flex flexDirection={'column'} alignItems={'center'} justifyContent={'center'}>
       {gameStatusText}
       <List aria-label='list of players in the game'>
         <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -354,7 +362,10 @@ export default function ShogiArea({
           <div style={{ paddingRight: '35px' }}>{whiteTimer}</div>
         </ListItem>
       </List>
-      <ShogiBoard gameAreaController={gameAreaController} />
-    </>
+      <Box verticalAlign={'top'} display={'inline-block'} textAlign={'center'}>
+        <ShogiBoard gameAreaController={gameAreaController} />
+        <YourSide></YourSide>
+      </Box>
+    </Flex>
   );
 }
