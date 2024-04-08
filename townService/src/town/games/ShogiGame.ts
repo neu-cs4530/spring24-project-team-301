@@ -1,4 +1,3 @@
-import { createImportSpecifier } from 'typescript';
 import InvalidParametersError, {
   BOARD_POSITION_NOT_VALID_MESSAGE,
   GAME_FULL_MESSAGE,
