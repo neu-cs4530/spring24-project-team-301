@@ -15,25 +15,49 @@ export default function ShogiLeaderboard(): JSX.Element {
   const townPlayers = usePlayers().map(player => player.userName);
   const [records, setRecords] = React.useState<ShogiRecordWithRank[]>([]);
 
+  // update when players join/leave the town
   useEffect(() => {
-    const getRecords = async (players: string[]) => {
-      const allStatsPromises = players.map(async email => {
-        const [resWins, resLosses, resDraws] = await Promise.all([
-          axios.get(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/wins?email=${email}`),
-          axios.get(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/losses?email=${email}`),
-          axios.get(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/draws?email=${email}`),
-        ]);
-        return {
-          email,
-          wins: resWins.data.wins,
-          losses: resLosses.data.losses,
-          draws: resDraws.data.draws,
-        };
-      });
-      const newRecords: ShogiRecord[] = await Promise.all(allStatsPromises);
+    const updateRecords = async () => {
+      const newPlayers = townPlayers.filter(
+        player => !records.some(record => record.email === player),
+      );
+      const playersToRemove = records.filter(record => !townPlayers.includes(record.email));
 
+      let updatedRecords: ShogiRecord[] = [];
+      // get records for new players
+      if (newPlayers.length > 0) {
+        const newStatsPromises = newPlayers.map(async email => {
+          const [resWins, resLosses, resDraws] = await Promise.all([
+            axios.get(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/wins?email=${email}`),
+            axios.get(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/losses?email=${email}`),
+            axios.get(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/draws?email=${email}`),
+          ]);
+          return {
+            email,
+            wins: resWins.data.wins,
+            losses: resLosses.data.losses,
+            draws: resDraws.data.draws,
+          };
+        });
+        const newRecords: ShogiRecord[] = await Promise.all(newStatsPromises);
+
+        updatedRecords = [
+          ...records.filter(
+            record =>
+              !playersToRemove.some(playerToRemove => playerToRemove.email === record.email),
+          ),
+          ...newRecords,
+        ];
+      } else if (playersToRemove.length > 0) {
+        // remove players who left
+        updatedRecords = records.filter(
+          record => !playersToRemove.some(playerToRemove => playerToRemove.email === record.email),
+        );
+      }
+
+      // ...re-rank the changed list
       // LEADERBOARD RANKING LOGIC: sort by wins descending, settle ties by losses ascending (draws do not matter). If two players have the same wins and losses, they receive the same rank
-      newRecords.sort((a, b) => {
+      updatedRecords.sort((a, b) => {
         // more wins better
         if (a.wins !== b.wins) return b.wins - a.wins;
         // fewer losses better
@@ -42,9 +66,9 @@ export default function ShogiLeaderboard(): JSX.Element {
       });
 
       let currentRank = 1;
-      let prevWins = newRecords[0].wins;
-      let prevLosses = newRecords[0].losses;
-      const recordsWithRank: ShogiRecordWithRank[] = newRecords.map((record, index) => {
+      let prevWins = updatedRecords[0].wins;
+      let prevLosses = updatedRecords[0].losses;
+      const recordsWithRank: ShogiRecordWithRank[] = updatedRecords.map((record, index) => {
         if (index !== 0) {
           // compare current record with previous and assign a rank
           if (record.wins === prevWins && record.losses === prevLosses) {
@@ -58,11 +82,11 @@ export default function ShogiLeaderboard(): JSX.Element {
         }
         return { ...record, rank: currentRank };
       });
-
       setRecords(recordsWithRank);
     };
-    getRecords(townPlayers);
-  }, [townPlayers]);
+
+    updateRecords();
+  }, [records, townPlayers]);
 
   return (
     <Table>
