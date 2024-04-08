@@ -12,12 +12,13 @@ type ShogiRecord = {
 type ShogiRecordWithRank = ShogiRecord & { rank: number };
 
 export default function ShogiLeaderboard(): JSX.Element {
-  const townPlayers = usePlayers().map(player => player.userName);
+  const players = usePlayers();
   const [records, setRecords] = React.useState<ShogiRecordWithRank[]>([]);
 
   // update when players join/leave the town
   useEffect(() => {
     const updateRecords = async () => {
+      const townPlayers = players.map(player => player.userName);
       const newPlayers = townPlayers.filter(
         player => !records.some(record => record.email === player),
       );
@@ -86,34 +87,35 @@ export default function ShogiLeaderboard(): JSX.Element {
     };
 
     updateRecords();
-  }, [records, townPlayers]);
+  }, [records, players]);
 
   return (
-    <Table>
-      <Thead>
-        <Tr>
-          <Th>Rank</Th>
-          <Th>Player</Th>
-          <Th>Record</Th>
-        </Tr>
-      </Thead>
-      <Tbody>
-        {records.map(record => {
-          return (
-            <Tr key={record.email}>
-              <Td fontSize='md' fontWeight='normal'>
-                {record.rank}
-              </Td>
-              <Td fontSize='md' fontWeight='normal'>
-                {record.email}
-              </Td>
-              <Td fontSize='md' fontWeight='normal'>
-                ({record.wins}-{record.losses}-{record.draws})
-              </Td>
-            </Tr>
-          );
-        })}
-      </Tbody>
-    </Table>
+    <></>
+    // <Table>
+    //   <Thead>
+    //     <Tr>
+    //       <Th>Rank</Th>
+    //       <Th>Player</Th>
+    //       <Th>Record</Th>
+    //     </Tr>
+    //   </Thead>
+    //   <Tbody>
+    //     {records.map(record => {
+    //       return (
+    //         <Tr key={record.email}>
+    //           <Td fontSize='md' fontWeight='normal'>
+    //             {record.rank}
+    //           </Td>
+    //           <Td fontSize='md' fontWeight='normal'>
+    //             {record.email}
+    //           </Td>
+    //           <Td fontSize='md' fontWeight='normal'>
+    //             ({record.wins}-{record.losses}-{record.draws})
+    //           </Td>
+    //         </Tr>
+    //       );
+    //     })}
+    //   </Tbody>
+    // </Table>
   );
 }
