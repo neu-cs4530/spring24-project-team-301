@@ -66,24 +66,26 @@ export default function ShogiLeaderboard(): JSX.Element {
         return 0;
       });
 
-      let currentRank = 1;
-      let prevWins = updatedRecords[0].wins;
-      let prevLosses = updatedRecords[0].losses;
-      const recordsWithRank: ShogiRecordWithRank[] = updatedRecords.map((record, index) => {
-        if (index !== 0) {
-          // compare current record with previous and assign a rank
-          if (record.wins === prevWins && record.losses === prevLosses) {
-            // same as previous rank
-          } else {
-            // lower rank
-            currentRank = index + 1;
-            prevWins = record.wins;
-            prevLosses = record.losses;
+      if (updatedRecords.length > 0) {
+        let currentRank = 1;
+        let prevWins = updatedRecords[0].wins;
+        let prevLosses = updatedRecords[0].losses;
+        const recordsWithRank: ShogiRecordWithRank[] = updatedRecords.map((record, index) => {
+          if (index !== 0) {
+            // compare current record with previous and assign a rank
+            if (record.wins === prevWins && record.losses === prevLosses) {
+              // same as previous rank
+            } else {
+              // lower rank
+              currentRank = index + 1;
+              prevWins = record.wins;
+              prevLosses = record.losses;
+            }
           }
-        }
-        return { ...record, rank: currentRank };
-      });
-      setRecords(recordsWithRank);
+          return { ...record, rank: currentRank };
+        });
+        setRecords(recordsWithRank);
+      }
     };
 
     updateRecords();
