@@ -1,5 +1,6 @@
 import ShogiAreaController, {
   ShogiCell,
+  ShogiCoord,
 } from '../../../../classes/interactable/ShogiAreaController';
 import { Button, chakra, Container, useToast } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
@@ -92,20 +93,14 @@ const StyledShogiSquare = chakra(Button, {
 export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.Element {
   const [board, setBoard] = useState<ShogiCell[][]>(gameAreaController.board);
   const [isOurTurn, setIsOurTurn] = useState(gameAreaController.isOurTurn);
-  const [from, setFrom] = useState({ row: -1, col: -1 });
+  const [from, setFrom] = useState<ShogiCoord>(undefined);
+  const [available, setAvailable] = useState<ShogiCoord[]>([]);
   const toast = useToast();
 
-  function getLine(piece: string): string {
-    const key: keyof ShogiPieces = (piece[0] === '+'
-      ? 'p'.concat(piece[1].toUpperCase())
-      : piece.toUpperCase()) as unknown as keyof ShogiPieces;
-    return shogiPiecePhotos[key];
-  }
-
   function isOurPiece(row: number, col: number): boolean {
+    if (board[row][col] === ' ') return false;
     const piece =
       board[row][col]?.charAt(0) === '+' ? board[row][col]?.charAt(1) : board[row][col]?.charAt(0);
-    // console.log(piece);
     if (gameAreaController.isBlack) {
       if (piece?.toLowerCase() !== piece) {
         return true;
@@ -119,6 +114,321 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
         return false;
       }
     }
+  }
+
+  function _canCapture(piece: ShogiCell, row: number, col: number): boolean {
+    if (row < 0 || row > 8 || col < 0 || col > 8) {
+      return false;
+    }
+    const capturable: ShogiCell = board[row][col];
+    console.log(capturable);
+    // If this square is empty
+    if (capturable === ' ' || capturable === undefined) {
+      return true;
+    } // If this square has an enemy piece
+    else if (
+      (capturable === capturable?.toUpperCase() && piece === piece?.toLowerCase()) ||
+      (capturable === capturable?.toLowerCase() && piece === piece?.toUpperCase())
+    ) {
+      return true;
+    } // If this square is your piece
+    return false;
+  }
+
+  function _generateKing(p: ShogiCell, row: ShogiIndex, col: ShogiIndex): void {
+    if (_canCapture(p, row - 1, col)) {
+      console.log('first');
+      setAvailable(prev => [...prev, { row: (row - 1) as ShogiIndex, col: col }]);
+    }
+    if (_canCapture(p, row - 1, col - 1)) {
+      console.log('second');
+      setAvailable(prev => [
+        ...prev,
+        { row: (row - 1) as ShogiIndex, col: (col - 1) as ShogiIndex },
+      ]);
+    }
+    if (_canCapture(p, row - 1, col + 1)) {
+      console.log('third');
+      setAvailable(prev => [
+        ...prev,
+        { row: (row - 1) as ShogiIndex, col: (col + 1) as ShogiIndex },
+      ]);
+    }
+    if (_canCapture(p, row + 1, col - 1)) {
+      console.log('fourth');
+      setAvailable(prev => [
+        ...prev,
+        { row: (row + 1) as ShogiIndex, col: (col - 1) as ShogiIndex },
+      ]);
+    }
+    if (_canCapture(p, row + 1, col + 1)) {
+      setAvailable(prev => [
+        ...prev,
+        { row: (row + 1) as ShogiIndex, col: (col + 1) as ShogiIndex },
+      ]);
+    }
+    if (_canCapture(p, row, col - 1)) {
+      setAvailable(prev => [...prev, { row: row, col: (col - 1) as ShogiIndex }]);
+    }
+    if (_canCapture(p, row, col + 1)) {
+      setAvailable(prev => [...prev, { row: row, col: (col + 1) as ShogiIndex }]);
+    }
+    if (_canCapture(p, row, col + 1)) {
+      setAvailable(prev => [...prev, { row: row, col: (col + 1) as ShogiIndex }]);
+    }
+    if (_canCapture(p, row + 1, col + 1)) {
+      setAvailable(prev => [...prev, { row: row, col: (col + 1) as ShogiIndex }]);
+    }
+    if (_canCapture(p, row + 1, col + 1)) {
+      setAvailable(prev => [...prev, { row: row, col: (col + 1) as ShogiIndex }]);
+    }
+    if (_canCapture(p, row + 1, col - 1)) {
+      setAvailable(prev => [...prev, { row: row, col: (col + 1) as ShogiIndex }]);
+    }
+  }
+
+  function _generateRook(p: ShogiCell, row: ShogiIndex, col: ShogiIndex): void {
+    for (let i = 1; i <= col; i++) {
+      if (_canCapture(p, row, col - i)) {
+        setAvailable(prev => [...prev, { row: row, col: (col - i) as ShogiIndex }]);
+        if (board[row][col - i] !== ' ') {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+    for (let i = 1; i <= 8 - col; i++) {
+      if (_canCapture(p, row, col + i)) {
+        setAvailable(prev => [...prev, { row: row, col: (col + i) as ShogiIndex }]);
+        if (board[row][col - i] !== ' ') {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+    for (let i = 1; i <= row; i++) {
+      if (_canCapture(p, row - i, col)) {
+        setAvailable(prev => [...prev, { row: (row - i) as ShogiIndex, col: col }]);
+        if (board[row - i][col] !== ' ') {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+    for (let i = 1; i <= 8 - row; i++) {
+      if (_canCapture(p, row + i, col)) {
+        setAvailable(prev => [...prev, { row: (row + i) as ShogiIndex, col: col }]);
+        if (board[row + i][col] !== ' ') {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+  }
+
+  function _generateBishop(p: ShogiCell, row: ShogiIndex, col: ShogiIndex): void {
+    for (let i = 1; i <= (col < row ? col : row); i++) {
+      if (_canCapture(p, row - i, col - i)) {
+        setAvailable(prev => [
+          ...prev,
+          { row: (row - i) as ShogiIndex, col: (col - i) as ShogiIndex },
+        ]);
+        if (board[row - i][col - i] !== ' ') {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+    for (let i = 1; i <= (8 - col < row ? 8 - col : row); i++) {
+      if (_canCapture(p, row - i, col + i)) {
+        setAvailable(prev => [
+          ...prev,
+          { row: (row - i) as ShogiIndex, col: (col + i) as ShogiIndex },
+        ]);
+        if (board[row - i][col + i] !== ' ') {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+    for (let i = 1; i <= (8 - col < 8 - row ? 8 - col : 8 - row); i++) {
+      if (_canCapture(p, row + i, col + i)) {
+        setAvailable(prev => [
+          ...prev,
+          { row: (row + i) as ShogiIndex, col: (col + i) as ShogiIndex },
+        ]);
+        if (board[row + i][col + i] !== ' ') {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+    for (let i = 1; i <= (8 - row < col ? 8 - row : col); i++) {
+      if (_canCapture(p, row + i, col - i)) {
+        setAvailable(prev => [
+          ...prev,
+          { row: (row + i) as ShogiIndex, col: (col - i) as ShogiIndex },
+        ]);
+        if (board[row + i][col - i] !== ' ') {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+  }
+
+  function _generateGold(p: ShogiCell, row: ShogiIndex, col: ShogiIndex) {
+    if (_canCapture(p, row - 1, col)) {
+      setAvailable(prev => [...prev, { row: (row - 1) as ShogiIndex, col: col }]);
+    }
+    if (col >= 1 && _canCapture(p, row - 1, col - 1)) {
+      setAvailable(prev => [
+        ...prev,
+        { row: (row - 1) as ShogiIndex, col: (col - 1) as ShogiIndex },
+      ]);
+    }
+    if (col <= 7 && _canCapture(p, row - 1, col + 1)) {
+      setAvailable(prev => [
+        ...prev,
+        { row: (row - 1) as ShogiIndex, col: (col + 1) as ShogiIndex },
+      ]);
+    }
+    if (col >= 1 && _canCapture(p, row + 1, col - 1)) {
+      setAvailable(prev => [
+        ...prev,
+        { row: (row + 1) as ShogiIndex, col: (col - 1) as ShogiIndex },
+      ]);
+    }
+    if (col <= 7 && _canCapture(p, row + 1, col + 1)) {
+      setAvailable(prev => [
+        ...prev,
+        { row: (row + 1) as ShogiIndex, col: (col + 1) as ShogiIndex },
+      ]);
+    }
+    if (_canCapture(p, row, col - 1)) {
+      setAvailable(prev => [...prev, { row: row, col: (col - 1) as ShogiIndex }]);
+    }
+    if (_canCapture(p, row, col + 1)) {
+      setAvailable(prev => [...prev, { row: row, col: (col + 1) as ShogiIndex }]);
+    }
+  }
+
+  function _generateAvailable(row: ShogiIndex, col: ShogiIndex): void {
+    setAvailable([]);
+    const p = board[row][col];
+    const pU = p?.toUpperCase();
+    // Pawn. Moves forward one space
+    if (pU === 'P') {
+      if (_canCapture(p, row - 1, col)) {
+        setAvailable(prev => [...prev, { row: (row - 1) as ShogiIndex, col: col }]);
+      }
+    } // Lance. Moves forward two spaces
+    else if (pU === 'L') {
+      for (let i = 1; i <= row; i++) {
+        if (_canCapture(p, row - i, col)) {
+          setAvailable(prev => [...prev, { row: (row - i) as ShogiIndex, col: col }]);
+          if (board[row - i][col] !== ' ') {
+            break;
+          }
+        } else {
+          break;
+        }
+      }
+    } // Knight. Moves forward two, left/right one, and jumps over other pieces.
+    else if (pU === 'N') {
+      if (_canCapture(p, row - 2, col - 1)) {
+        setAvailable([
+          ...available,
+          { row: (row - 2) as ShogiIndex, col: (col - 1) as ShogiIndex },
+        ]);
+      }
+      if (_canCapture(p, row - 2, row + 1)) {
+        setAvailable([
+          ...available,
+          { row: (row - 2) as ShogiIndex, col: (col + 1) as ShogiIndex },
+        ]);
+      }
+    } // Silver General. Moves one square diagonally or straight forward.
+    else if (pU === 'S') {
+      if (_canCapture(p, row - 1, col)) {
+        setAvailable(prev => [...prev, { row: (row - 1) as ShogiIndex, col: col }]);
+      }
+      if (_canCapture(p, row - 1, col - 1)) {
+        setAvailable(prev => [
+          ...prev,
+          { row: (row - 1) as ShogiIndex, col: (col - 1) as ShogiIndex },
+        ]);
+      }
+      if (_canCapture(p, row - 1, col + 1)) {
+        setAvailable(prev => [
+          ...prev,
+          { row: (row - 1) as ShogiIndex, col: (col + 1) as ShogiIndex },
+        ]);
+      }
+      if (_canCapture(p, (row + 1) as ShogiIndex, (col - 1) as ShogiIndex)) {
+        setAvailable(prev => [
+          ...prev,
+          { row: (row + 1) as ShogiIndex, col: (col - 1) as ShogiIndex },
+        ]);
+      }
+      if (_canCapture(p, row + 1, col + 1)) {
+        setAvailable(prev => [
+          ...prev,
+          { row: (row + 1) as ShogiIndex, col: (col + 1) as ShogiIndex },
+        ]);
+      }
+    } // Gold General. Moves like the Silver General, but can also move sideways
+    else if (pU === 'G' || pU === '+S' || pU === '+P' || pU === '+N' || pU === '+L') {
+      _generateGold(p, row, col);
+    } // Bishop. Travels any number of squares diagonally.
+    else if (pU === 'B') {
+      _generateBishop(p, row, col);
+    } // Rook. It moves like a chess rook.
+    else if (pU === 'R') {
+      _generateRook(p, row, col);
+    } // King. It moves like a chess king.
+    else if (pU === 'K') {
+      _generateKing(p, row, col);
+    } // Dragon (Promoted Rook). Moves like a rook and a king.
+    else if (pU === '+R') {
+      _generateRook(p, row, col);
+      _generateKing(p, row, col);
+    } // Horse (Promoted Bishop). Moves like a bishop and a king.
+    else if (pU === '+B') {
+      _generateBishop(p, row, col);
+      _generateKing(p, row, col);
+    }
+  }
+
+  function selectPiece(row: ShogiIndex, col: ShogiIndex): void {
+    setFrom({ row, col });
+    _generateAvailable(row, col);
+  }
+
+  function getLine(piece: string): string {
+    const key: keyof ShogiPieces = (piece[0] === '+'
+      ? 'p'.concat(piece[1].toUpperCase())
+      : piece.toUpperCase()) as unknown as keyof ShogiPieces;
+    return shogiPiecePhotos[key];
+  }
+
+  function containsObject(row: number, col: number) {
+    let i;
+    for (i = 0; i < available.length; i++) {
+      if (available[i]?.row === row && available[i]?.col === col) {
+        console.log('true');
+        return true;
+      }
+    }
+    return false;
   }
 
   useEffect(() => {
@@ -135,48 +445,42 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
         return row.map((cell, colIndex) => {
           return (
             <StyledShogiSquare
-              style={{ backgroundColor: '#deb887' }}
+              style={
+                containsObject(rowIndex, colIndex)
+                  ? { backgroundColor: '#00FF00' }
+                  : { backgroundColor: '#deb887' }
+              }
               key={`${rowIndex}.${colIndex}`}
               onClick={async () => {
-                if (from.row !== -1 && !(from.row === rowIndex && from.col === colIndex)) {
-                  try {
-                    await gameAreaController.makeMove(
-                      (gameAreaController.isBlack ? from.row : 8 - from.row) as ShogiIndex,
-                      from.col as ShogiIndex,
-                      (gameAreaController.isBlack ? rowIndex : 8 - rowIndex) as ShogiIndex,
-                      colIndex as ShogiIndex,
-                    );
-                    setFrom({
-                      row: -1,
-                      col: -1,
-                    });
-                  } catch (e) {
-                    toast({
-                      title: 'Error making move',
-                      description: (e as Error).toString(),
-                      status: 'error',
-                    });
-                    setFrom({
-                      row: -1,
-                      col: -1,
-                    });
+                if (from !== undefined) {
+                  if (isOurPiece(rowIndex, colIndex)) {
+                    setFrom(undefined);
+                    setAvailable([]);
+                  } else {
+                    try {
+                      await gameAreaController.makeMove(
+                        (gameAreaController.isBlack ? from.row : 8 - from.row) as ShogiIndex,
+                        from.col as ShogiIndex,
+                        (gameAreaController.isBlack ? rowIndex : 8 - rowIndex) as ShogiIndex,
+                        colIndex as ShogiIndex,
+                      );
+                    } catch (e) {
+                      toast({
+                        title: 'Error making move',
+                        description: (e as Error).toString(),
+                        status: 'error',
+                      });
+                    }
+                    setFrom(undefined);
+                    setAvailable([]);
                   }
-                } else if (
-                  (from.row === rowIndex && from.row === colIndex) ||
-                  (board[rowIndex][colIndex] === ' ' && board[rowIndex][colIndex] === undefined)
-                ) {
-                  setFrom({
-                    row: -1,
-                    col: -1,
-                  });
                 } else {
-                  setFrom({
-                    row: rowIndex,
-                    col: colIndex,
-                  });
+                  selectPiece(rowIndex as ShogiIndex, colIndex as ShogiIndex);
                 }
               }}
-              disabled={!isOurTurn}
+              disabled={
+                !isOurTurn || (isOurTurn && from === undefined && !isOurPiece(rowIndex, colIndex))
+              }
               backgroundColor={cell}
               aria-label={`Cell ${rowIndex},${colIndex} (${cell || 'Empty'})`}>
               {board[rowIndex][colIndex] !== ' ' && board[rowIndex][colIndex] !== undefined ? (
