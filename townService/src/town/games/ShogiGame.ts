@@ -1,3 +1,4 @@
+import { createImportSpecifier } from 'typescript';
 import InvalidParametersError, {
   BOARD_POSITION_NOT_VALID_MESSAGE,
   GAME_FULL_MESSAGE,
@@ -156,7 +157,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     const { from, to, drop } = move;
     const piece = drop || this._board[from.row][from.col];
     // Create a copy of the board to simulate the move
-    const simulatedBoard = [...board];
+    const simulatedBoard = board.map(row => row.slice());
     // Simulate the move, only need to change from if not a drop move
     if (!drop) {
       simulatedBoard[from.row][from.col] = ' ';
@@ -689,10 +690,17 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     const validMoves: ShogiMove[] = [];
     for (let x = 0; x < board.length; x++) {
       for (let y = 0; y < board[x].length; y++) {
+        let promo = false;
+        if (
+          (board[row][col].toLowerCase() === board[row][col] && x > 5) ||
+          (board[row][col].toUpperCase() === board[row][col] && x < 3)
+        ) {
+          promo = true;
+        }
         const move: ShogiMove = {
           from: { row: row as ShogiIndex, col: col as ShogiIndex },
           to: { row: x as ShogiIndex, col: y as ShogiIndex },
-          promotion: false,
+          promotion: promo,
         };
         if (this.validateMoveOnBoard(move, board)) {
           validMoves.push(move);
@@ -747,7 +755,11 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     let bestValue = -Infinity;
     for (const move of allMoves) {
       const simulatedBoard = this._simulateMove(move, this._board);
-      const value = -this._negamax(simulatedBoard, depth);
+      const value = -this._negamax(
+        simulatedBoard,
+        depth,
+        this.state.numMoves % 2 === 0 ? 'white' : 'black',
+      );
       if (value > bestValue) {
         bestValue = value;
         bestMove.from = move.from;
@@ -774,17 +786,24 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     };
   }
 
-  private _negamax(board: string[][], depth: number): number {
-    if (depth === 0) return this._evaluateBoard(board);
+  private _negamax(board: string[][], depth: number, color: ShogiColor): number {
+    if (depth === 0) return this._evaluateBoard(board, color);
     let bestValue = -Infinity;
     for (let i = 0; i < this._board.length; i++) {
       for (let j = 0; j < this._board[i].length; j++) {
         const piece = board[i][j];
-        if (piece !== ' ') {
+        if (
+          piece !== ' ' &&
+          (color === 'black' ? piece === piece.toUpperCase() : piece === piece.toLowerCase())
+        ) {
           const moves = this.getValidMovesForPieceOnBoard(i, j, board);
           for (const move of moves) {
             const simulatedBoard = this._simulateMove(move, board);
-            const value = -this._negamax(simulatedBoard, depth - 1);
+            const value = -this._negamax(
+              simulatedBoard,
+              depth - 1,
+              color === 'black' ? 'white' : 'black',
+            );
             bestValue = Math.max(bestValue, value);
           }
         }
@@ -793,14 +812,33 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     return bestValue;
   }
 
-  private _evaluateBoard(board: string[][]): number {
+  private _evaluateBoard(board: string[][], color: ShogiColor): number {
     let score = 0;
     for (let i = 0; i < board.length; i++) {
       for (let j = 0; j < board[i].length; j++) {
         const piece = board[i][j];
         if (piece !== ' ') {
-          const pieceValue = this._pieceValue(piece);
-          score += piece === piece.toUpperCase() ? pieceValue : -pieceValue;
+          const pieceValue = this._pieceValue(piece.toLowerCase());
+          score +=
+            (piece === piece.toUpperCase() && color === 'black') ||
+            (piece === piece.toLowerCase() && color === 'white')
+              ? pieceValue
+              : -pieceValue;
+          if (color === 'black') {
+            if (piece === piece.toUpperCase()) {
+              score += (8 - i) / 5;
+            }
+            if (piece === piece.toLowerCase()) {
+              score -= i / 5;
+            }
+          } else {
+            if (piece === piece.toUpperCase()) {
+              score -= (8 - i) / 5;
+            }
+            if (piece === piece.toLowerCase()) {
+              score += i / 5;
+            }
+          }
         }
       }
     }
@@ -836,7 +874,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
       case '+r':
         return 11;
       case 'k':
-        return 1000;
+        return 100;
       default:
         return 0;
     }

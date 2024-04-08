@@ -33,6 +33,7 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
   protected _board: ShogiCell[][] = this.createBoardFromSfen(
     'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL',
   );
+
   protected _engine = false;
 
   /**
@@ -272,7 +273,7 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
       move,
     });
     if (this._engine) {
-      this.getEngineMove(3);
+      this.getEngineMove(2);
     }
   }
 
