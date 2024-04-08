@@ -105,7 +105,7 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
   function isOurPiece(row: number, col: number): boolean {
     const piece =
       board[row][col]?.charAt(0) === '+' ? board[row][col]?.charAt(1) : board[row][col]?.charAt(0);
-    console.log(piece);
+    // console.log(piece);
     if (gameAreaController.isBlack) {
       if (piece?.toLowerCase() !== piece) {
         return true;
