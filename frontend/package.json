@@ -37,6 +37,7 @@
     "lodash": "^4.17.21",
     "lodash.throttle": "^4.1.1",
     "jest-mock-extended": "^3.0.4",
+    "@socket.io/component-emitter": "^3.1.0",
     "nanoid": "^4.0.0",
     "next": "^12.3.4",
     "phaser": "^3.60.0",
@@ -88,7 +89,6 @@
   "devDependencies": {
     "@geckos.io/phaser-on-nodejs": "^1.2.7",
     "@next/eslint-plugin-next": "^13.4.4",
-    "@socket.io/component-emitter": "^3.1.0",
     "@stryker-mutator/core": "^6.1.2",
     "@stryker-mutator/jest-runner": "^6.2.2",
     "@stryker-mutator/typescript-checker": "^6.1.2",

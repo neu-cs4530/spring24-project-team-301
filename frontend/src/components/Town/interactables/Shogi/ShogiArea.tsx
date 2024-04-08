@@ -336,13 +336,17 @@ export default function ShogiArea({
     if (gameStatus === 'OVER') gameStatusStr = 'over';
     else if (gameStatus === 'WAITING_FOR_PLAYERS') gameStatusStr = 'waiting for players to join';
     if (joinedGame) {
-      gameStatusText = <b>Game {gameStatusStr}. {startComputerGameButton}</b>;
+      gameStatusText = (
+        <b>
+          Game {gameStatusStr}. {startComputerGameButton}
+        </b>
+      );
     } else {
-    gameStatusText = (
-      <b>
-        Game {gameStatusStr}. {joinGameButton}
-      </b>
-    );
+      gameStatusText = (
+        <b>
+          Game {gameStatusStr}. {joinGameButton}
+        </b>
+      );
     }
   }
   let blackTimer = '';
@@ -370,12 +374,20 @@ export default function ShogiArea({
       {gameStatusText}
       <List aria-label='list of players in the game'>
         <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <div>Black: {black?.userName || (gameAreaController.status === 'IN_PROGRESS' ? 'CPU' : '(waiting for player)')}</div>
+          <div>
+            Black:{' '}
+            {black?.userName ||
+              (gameAreaController.status === 'IN_PROGRESS' ? 'CPU' : '(waiting for player)')}
+          </div>
           <div>{blackRecordText}</div>
           <div style={{ paddingRight: '35px' }}>{blackTimer}</div>
         </ListItem>
         <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <div>White: {white?.userName || (gameAreaController.status === 'IN_PROGRESS' ? 'CPU' : '(waiting for player)')}</div>
+          <div>
+            White:{' '}
+            {white?.userName ||
+              (gameAreaController.status === 'IN_PROGRESS' ? 'CPU' : '(waiting for player)')}
+          </div>
           <div>{whiteRecordText}</div>
           <div style={{ paddingRight: '35px' }}>{whiteTimer}</div>
         </ListItem>
