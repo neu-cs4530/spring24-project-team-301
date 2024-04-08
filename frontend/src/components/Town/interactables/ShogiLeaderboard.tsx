@@ -90,32 +90,31 @@ export default function ShogiLeaderboard(): JSX.Element {
   }, [records, players]);
 
   return (
-    <></>
-    // <Table>
-    //   <Thead>
-    //     <Tr>
-    //       <Th>Rank</Th>
-    //       <Th>Player</Th>
-    //       <Th>Record</Th>
-    //     </Tr>
-    //   </Thead>
-    //   <Tbody>
-    //     {records.map(record => {
-    //       return (
-    //         <Tr key={record.email}>
-    //           <Td fontSize='md' fontWeight='normal'>
-    //             {record.rank}
-    //           </Td>
-    //           <Td fontSize='md' fontWeight='normal'>
-    //             {record.email}
-    //           </Td>
-    //           <Td fontSize='md' fontWeight='normal'>
-    //             ({record.wins}-{record.losses}-{record.draws})
-    //           </Td>
-    //         </Tr>
-    //       );
-    //     })}
-    //   </Tbody>
-    // </Table>
+    <Table>
+      <Thead>
+        <Tr>
+          <Th>Rank</Th>
+          <Th>Player</Th>
+          <Th>Record</Th>
+        </Tr>
+      </Thead>
+      <Tbody>
+        {records.map(record => {
+          return (
+            <Tr key={record.email}>
+              <Td fontSize='md' fontWeight='normal'>
+                {record.rank}
+              </Td>
+              <Td fontSize='md' fontWeight='normal'>
+                {record.email}
+              </Td>
+              <Td fontSize='md' fontWeight='normal'>
+                ({record.wins}-{record.losses}-{record.draws})
+              </Td>
+            </Tr>
+          );
+        })}
+      </Tbody>
+    </Table>
   );
 }
