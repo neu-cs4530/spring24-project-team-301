@@ -17,7 +17,13 @@ import GameAreaController, {
   PLAYER_NOT_IN_GAME_ERROR,
 } from './GameAreaController';
 
-export type ShogiCell = ShogiPiece | undefined;
+export type ShogiCoord =
+  | {
+      row: ShogiIndex;
+      col: ShogiIndex;
+    }
+  | undefined;
+export type ShogiCell = ShogiPiece | ' ' | undefined;
 export type ShogiEvents = GameEventTypes & {
   boardChanged: (board: ShogiCell[][]) => void;
   turnChanged: (isOurTurn: boolean) => void;
@@ -45,6 +51,10 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
    */
   get board(): ShogiCell[][] {
     return this._board;
+  }
+
+  get available(): ShogiCoord[] {
+    return this._available;
   }
 
   /**
