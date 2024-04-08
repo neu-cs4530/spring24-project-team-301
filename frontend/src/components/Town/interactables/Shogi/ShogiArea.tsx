@@ -53,8 +53,6 @@ export default function ShogiArea({
   const [isLoadingWhiteRecord, setIsLoadingWhiteRecord] = useState(false);
 
   const fetchRecords = async (email: string) => {
-    setIsLoadingBlackRecord(true);
-    setIsLoadingWhiteRecord(true);
     try {
       const [resWins, resLosses, resDraws] = await Promise.all([
         axios.get(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/wins?email=${email}`),
@@ -72,37 +70,33 @@ export default function ShogiArea({
     }
   };
 
-  const fetchAndUpdateRecords = async () => {
-    if (black && white) {
-      const [newBlackRecord, newWhiteRecord] = await Promise.all([
-        fetchRecords(black?.userName || ''),
-        fetchRecords(white?.userName || ''),
-      ]);
-
-      setBlackRecord(newBlackRecord);
-      setWhiteRecord(newWhiteRecord);
-
-      setIsLoadingBlackRecord(false);
-      setIsLoadingWhiteRecord(false);
-    } else if (white) {
-      const newWhiteRecord = await fetchRecords(white?.userName || '');
-      setWhiteRecord(newWhiteRecord);
-
-      setIsLoadingWhiteRecord(false);
-    } else if (black) {
-      const newBlackRecord = await fetchRecords(black?.userName || '');
-      setBlackRecord(newBlackRecord);
-
-      setIsLoadingBlackRecord(false);
-    }
-  };
-
+  // black record updates
   useEffect(() => {
-    if (gameStatus === 'WAITING_TO_START' || gameStatus === 'WAITING_FOR_PLAYERS') {
-      fetchAndUpdateRecords();
-    }
-    return () => {};
-  }, [gameStatus, black, white]);
+    const fetchAndUpdateBlackRecords = async () => {
+      if (black) {
+        setIsLoadingBlackRecord(true);
+        const newBlackRecord = await fetchRecords(black.userName);
+        setBlackRecord(newBlackRecord);
+        setIsLoadingBlackRecord(false);
+      }
+    };
+
+    fetchAndUpdateBlackRecords();
+  }, [black]);
+
+  // white record updates
+  useEffect(() => {
+    const fetchAndUpdateWhiteRecords = async () => {
+      if (white) {
+        setIsLoadingWhiteRecord(true);
+        const newWhiteRecord = await fetchRecords(white.userName);
+        setWhiteRecord(newWhiteRecord);
+        setIsLoadingWhiteRecord(false);
+      }
+    };
+
+    fetchAndUpdateWhiteRecords();
+  }, [white]);
 
   // maintain player timers
   useEffect(() => {
@@ -166,6 +160,31 @@ export default function ShogiArea({
     gameAreaController.addListener('gameUpdated', updateGameState);
     const onGameEnd = async () => {
       const winner = gameAreaController.winner;
+      const fetchAndUpdateRecords = async () => {
+        if (black && white) {
+          setIsLoadingBlackRecord(true);
+          setIsLoadingWhiteRecord(true);
+          const [newBlackRecord, newWhiteRecord] = await Promise.all([
+            fetchRecords(black.userName),
+            fetchRecords(white.userName),
+          ]);
+          setBlackRecord(newBlackRecord);
+          setWhiteRecord(newWhiteRecord);
+
+          setIsLoadingBlackRecord(false);
+          setIsLoadingWhiteRecord(false);
+        } else if (black) {
+          setIsLoadingBlackRecord(true);
+          const newBlackRecord = await fetchRecords(black.userName);
+          setBlackRecord(newBlackRecord);
+          setIsLoadingBlackRecord(false);
+        } else if (white) {
+          setIsLoadingWhiteRecord(true);
+          const newWhiteRecord = await fetchRecords(white.userName);
+          setWhiteRecord(newWhiteRecord);
+          setIsLoadingWhiteRecord(false);
+        }
+      };
       if (townController.ourPlayer === black || townController.ourPlayer === white) {
         if (!winner) {
           toast({
