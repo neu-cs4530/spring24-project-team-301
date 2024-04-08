@@ -692,8 +692,9 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
       for (let y = 0; y < board[x].length; y++) {
         let promo = false;
         if (
-          (board[row][col].toLowerCase() === board[row][col] && x > 5) ||
-          (board[row][col].toUpperCase() === board[row][col] && x < 3)
+          ((board[row][col].toLowerCase() === board[row][col] && x > 5) ||
+            (board[row][col].toUpperCase() === board[row][col] && x < 3)) &&
+          !board[row][col].includes('+')
         ) {
           promo = true;
         }
