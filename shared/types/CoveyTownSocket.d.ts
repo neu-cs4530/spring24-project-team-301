@@ -292,7 +292,7 @@ export interface EngineMoveCommand {
   gameID: GameInstanceID;
   depth: EngineDepth;
 }
-export type EngineDepth = 1 | 2 | 3 | 4 | 5;
+export type EngineDepth = 0 | 1 | 2 | 3 | 4 | 5;
 export interface ValidMovesCommand {
   type: 'ValidMoves';
   gameID: GameInstanceID;
