@@ -40,13 +40,7 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
     'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL',
   );
 
-  protected _piece: ShogiCoord = undefined;
-
-  protected _available: ShogiCoord[] = [];
-
-  get piece(): ShogiCoord {
-    return this._piece;
-  }
+  protected _engine = false;
 
   /**
    * Returns the current state of the board.
@@ -57,10 +51,6 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
    */
   get board(): ShogiCell[][] {
     return this._board;
-  }
-
-  get available(): ShogiCoord[] {
-    return this._available;
   }
 
   /**
@@ -154,7 +144,7 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
    */
   get whoseTurn(): PlayerController | undefined {
     const { white, black } = this;
-    if (!white || !black || this._model.game?.state.status !== 'IN_PROGRESS') {
+    if (this._model.game?.state.status !== 'IN_PROGRESS') {
       return undefined;
     }
     if (this.moveCount % 2 === 0) {
@@ -241,7 +231,10 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
    */
   public async startGame(): Promise<void> {
     const instanceID = this._instanceID;
-    if (!instanceID || this._model.game?.state.status !== 'WAITING_TO_START') {
+    if (this._model.game?.state.status === 'WAITING_FOR_PLAYERS') {
+      this._engine = true;
+    }
+    if (!instanceID) {
       throw new Error(NO_GAME_STARTABLE);
     }
     await this._townController.sendInteractableCommand(this.id, {
@@ -285,6 +278,9 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
       gameID: instanceID,
       move,
     });
+    if (this._engine) {
+      this.getEngineMove(2);
+    }
   }
 
   /**
@@ -304,6 +300,12 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
     });
   }
 
+  /**
+   * Sends a request to the server to get the valid moves
+   * @param row row of the piece
+   * @param col col of the piece
+   * @returns array of valid moves
+   */
   public async getValidMoves(row: ShogiIndex, col: ShogiIndex): Promise<ShogiMove[]> {
     const instanceID = this._instanceID;
     if (!instanceID || this._model.game?.state.status !== 'IN_PROGRESS') {

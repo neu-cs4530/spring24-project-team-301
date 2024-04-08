@@ -47,7 +47,7 @@ import PlayerController from './PlayerController';
 import ShogiAreaController from './interactable/ShogiAreaController';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
-const SOCKET_COMMAND_TIMEOUT_MS = 5000;
+const SOCKET_COMMAND_TIMEOUT_MS = 30000;
 
 export type ConnectionProperties = {
   userName: string;

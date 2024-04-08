@@ -5,7 +5,6 @@ import {
   BOARD_POSITION_NOT_VALID_MESSAGE,
   GAME_FULL_MESSAGE,
   GAME_NOT_IN_PROGRESS_MESSAGE,
-  GAME_NOT_STARTABLE_MESSAGE,
   MOVE_NOT_YOUR_TURN_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
@@ -70,11 +69,6 @@ describe('ShogiGame', () => {
     });
   });
   describe('_startGame', () => {
-    test('if the status is not WAITING_TO_START, it throws an error', () => {
-      const player = createPlayerForTesting();
-      game.join(player);
-      expect(() => game.startGame(player)).toThrowError(GAME_NOT_STARTABLE_MESSAGE);
-    });
     test('if the player is not in the game, it throws an error', () => {
       game.join(createPlayerForTesting());
       game.join(createPlayerForTesting());

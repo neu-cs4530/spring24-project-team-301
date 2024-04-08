@@ -30,6 +30,7 @@ export default function ShogiArea({
   const [black, setBlack] = useState<PlayerController | undefined>(gameAreaController.black);
   const [white, setWhite] = useState<PlayerController | undefined>(gameAreaController.white);
   const [joiningGame, setJoiningGame] = useState(false);
+  const [joinedGame, setJoinedGame] = useState(false);
 
   const [gameStatus, setGameStatus] = useState<GameStatus>(gameAreaController.status);
   const [moveCount, setMoveCount] = useState<number>(gameAreaController.moveCount);
@@ -260,7 +261,7 @@ export default function ShogiArea({
         Game in progress, {moveCount} moves in, currently{' '}
         {gameAreaController.whoseTurn === townController.ourPlayer
           ? 'your'
-          : gameAreaController.whoseTurn?.userName + "'s"}{' '}
+          : gameAreaController.whoseTurn?.userName || 'CPU' + "'s"}{' '}
         turn{' '}
         {townController.ourPlayer === gameAreaController.black
           ? "(You're black)"
@@ -304,20 +305,49 @@ export default function ShogiArea({
             });
           }
           setJoiningGame(false);
+          setJoinedGame(true);
         }}
         isLoading={joiningGame}
         disabled={joiningGame}>
         Join New Game
       </Button>
     );
+    const startComputerGameButton = (
+      <Button
+        onClick={async () => {
+          setJoiningGame(true);
+          try {
+            await gameAreaController.startGame();
+          } catch (err) {
+            toast({
+              title: 'Error starting game',
+              description: (err as Error).toString(),
+              status: 'error',
+            });
+          }
+          setJoiningGame(false);
+        }}
+        isLoading={joiningGame}
+        disabled={joiningGame}>
+        Start CPU Game
+      </Button>
+    );
     let gameStatusStr;
     if (gameStatus === 'OVER') gameStatusStr = 'over';
     else if (gameStatus === 'WAITING_FOR_PLAYERS') gameStatusStr = 'waiting for players to join';
-    gameStatusText = (
-      <b>
-        Game {gameStatusStr}. {joinGameButton}
-      </b>
-    );
+    if (joinedGame) {
+      gameStatusText = (
+        <b>
+          Game {gameStatusStr}. {startComputerGameButton}
+        </b>
+      );
+    } else {
+      gameStatusText = (
+        <b>
+          Game {gameStatusStr}. {joinGameButton}
+        </b>
+      );
+    }
   }
   let blackTimer = '';
   let blackRecordText = '';
@@ -344,12 +374,20 @@ export default function ShogiArea({
       {gameStatusText}
       <List aria-label='list of players in the game'>
         <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <div>Black: {black?.userName || '(waiting for player)'}</div>
+          <div>
+            Black:{' '}
+            {black?.userName ||
+              (gameAreaController.status === 'IN_PROGRESS' ? 'CPU' : '(waiting for player)')}
+          </div>
           <div>{blackRecordText}</div>
           <div style={{ paddingRight: '35px' }}>{blackTimer}</div>
         </ListItem>
         <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <div>White: {white?.userName || '(waiting for player)'}</div>
+          <div>
+            White:{' '}
+            {white?.userName ||
+              (gameAreaController.status === 'IN_PROGRESS' ? 'CPU' : '(waiting for player)')}
+          </div>
           <div>{whiteRecordText}</div>
           <div style={{ paddingRight: '35px' }}>{whiteTimer}</div>
         </ListItem>
