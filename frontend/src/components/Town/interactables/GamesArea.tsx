@@ -78,11 +78,11 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
               <AccordionIcon />
             </AccordionButton>
             <AccordionPanel>
-              {/* {gameAreaController.toInteractableAreaModel().type === 'ShogiArea' ? (
-        <ShogiLeaderboard />
-      ) : (
-        <Leaderboard results={history} />
-      )} */}
+              {gameAreaController.toInteractableAreaModel().type === 'ShogiArea' ? (
+                <ShogiLeaderboard />
+              ) : (
+                <Leaderboard results={history} />
+              )}
             </AccordionPanel>
           </Heading>
         </AccordionItem>

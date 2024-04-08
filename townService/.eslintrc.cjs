@@ -22,10 +22,6 @@ module.exports = {
     'no-plusplus': 0,
     'class-methods-use-this': 0,
     '@typescript-eslint/no-unused-vars': [1, { args: 'none' }],
-    'import/no-extraneous-dependencies': [
-      'error',
-      { devDependencies: ['**/*.test.ts', '**/TestUtils.ts'] },
-    ],
     '@typescript-eslint/naming-convention': [
       'error',
       {

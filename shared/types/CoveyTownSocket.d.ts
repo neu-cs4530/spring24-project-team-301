@@ -162,6 +162,7 @@ export interface ShogiGameState extends WinnableGameState {
   blackReady?: boolean;
   white?: PlayerID;
   whiteReady?: boolean;
+  engine?: boolean;
   numMoves: number;
   spectators: PlayerID[];
 }
