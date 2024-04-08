@@ -53,10 +53,6 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
     return this._board;
   }
 
-  get available(): ShogiCoord[] {
-    return this._available;
-  }
-
   /**
    * Returns the player with the 'White' game piece, if there is one, or undefined otherwise
    */
