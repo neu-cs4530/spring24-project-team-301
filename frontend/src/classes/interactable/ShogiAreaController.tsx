@@ -42,6 +42,8 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
 
   protected _engine = false;
 
+  protected _difficulty: EngineDepth = 0;
+
   /**
    * Returns the current state of the board.
    *
@@ -279,7 +281,7 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
       move,
     });
     if (this._engine) {
-      this.getEngineMove(2);
+      this.getEngineMove(this._difficulty);
     }
   }
 
@@ -298,6 +300,16 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
       gameID: instanceID,
       depth,
     });
+  }
+
+  /**
+   * Updates the difficulty value for the engine
+   * @param difficulty new difficulty value
+   * @returns void
+   */
+  public async setDifficulty(difficulty: EngineDepth): Promise<void> {
+    console.log(difficulty);
+    this._difficulty = difficulty;
   }
 
   /**
