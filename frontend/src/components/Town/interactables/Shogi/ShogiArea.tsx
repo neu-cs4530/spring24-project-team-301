@@ -18,7 +18,7 @@ import ShogiAreaController from '../../../../classes/interactable/ShogiAreaContr
 import PlayerController from '../../../../classes/PlayerController';
 import { useInteractableAreaController } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
-import { GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
+import { EngineDepth, GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
 import ShogiBoard from './ShogiBoard';
 import axios from 'axios';
 import ShogiLeaderboard from '../ShogiLeaderboard';
@@ -448,25 +448,35 @@ export default function ShogiArea({
       </Button>
     );
     const startComputerGameButton = (
-      <Button
-        color='gray.800'
-        onClick={async () => {
-          setJoiningGame(true);
-          try {
-            await gameAreaController.startGame();
-          } catch (err) {
-            toast({
-              title: 'Error starting game',
-              description: (err as Error).toString(),
-              status: 'error',
-            });
-          }
-          setJoiningGame(false);
-        }}
-        isLoading={joiningGame}
-        disabled={joiningGame}>
-        Start CPU Game
-      </Button>
+      <div>
+        <Button
+          color='gray.800'
+          onClick={async () => {
+            setJoiningGame(true);
+            try {
+              await gameAreaController.startGame();
+            } catch (err) {
+              toast({
+                title: 'Error starting game',
+                description: (err as Error).toString(),
+                status: 'error',
+              });
+            }
+            setJoiningGame(false);
+          }}
+          isLoading={joiningGame}
+          disabled={joiningGame}>
+          Start CPU Game
+        </Button>
+        <select
+          onChange={event =>
+            gameAreaController.setDifficulty(Number(event.target.value) as EngineDepth)
+          }>
+          <option value='0'>Beginner</option>
+          <option value='1'>Moderate</option>
+          <option value='2'>Advanced</option>
+        </select>
+      </div>
     );
     let gameStatusStr;
     if (gameStatus === 'OVER') gameStatusStr = 'over';
