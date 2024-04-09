@@ -225,9 +225,9 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
     if (newGame) {
       const newBoard = this.createBoardFromSfen(newGame.state.sfen);
       const newInhand = newGame.state.inhand.split('').filter(piece => {
-        if (this.isBlack && piece.toLowerCase() === piece) {
+        if (this.isBlack && piece.toUpperCase() === piece) {
           return true;
-        } else if (!this.isBlack && piece.toUpperCase() === piece) {
+        } else if (!this.isBlack && piece.toLowerCase() === piece) {
           return true;
         }
         return false;

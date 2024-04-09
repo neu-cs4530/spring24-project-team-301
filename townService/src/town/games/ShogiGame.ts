@@ -557,6 +557,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
    * @throws InvalidParametersError if the move is not valid (BOARD_POSITION_NOT_VALID_MESSAGE)
    */
   public applyMove(move: GameMove<ShogiMove>): void {
+    console.log(move);
     if (this.state.status !== 'IN_PROGRESS') {
       throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
     }
@@ -567,7 +568,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
       throw new InvalidParametersError(MOVE_NOT_YOUR_TURN_MESSAGE);
     }
     const {
-      move: { from, to, promotion },
+      move: { from, to, promotion, drop },
     } = move;
     const board = this._board;
     const piece = board[from.row][from.col];
@@ -579,14 +580,25 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     }
     if (this.validateMove(move)) {
       if (board[to.row][to.col] !== ' ') {
-        const inhand = this.state.inhand + board[to.row][to.col];
+        const inhand =
+          this.state.inhand + board[to.row][to.col] === board[to.row][to.col].toUpperCase()
+            ? board[to.row][to.col].toLowerCase()
+            : board[to.row][to.col].toUpperCase();
         this.state = {
           ...this.state,
           inhand,
         };
       }
-      board[from.row][from.col] = ' ';
-      board[to.row][to.col] = promotion ? `+${piece}` : piece;
+      if (!drop) {
+        board[from.row][from.col] = ' ';
+        board[to.row][to.col] = promotion ? `+${piece}` : piece;
+      } else {
+        board[to.row][to.col] = drop;
+        this.state = {
+          ...this.state,
+          inhand: this.state.inhand.replace(drop, ''),
+        };
+      }
       this.state = {
         ...this.state,
         sfen: this._boardToSfen(board),
@@ -610,6 +622,7 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     } else {
       throw new InvalidParametersError(BOARD_POSITION_NOT_VALID_MESSAGE);
     }
+    console.log(this.state.sfen);
   }
 
   protected _join(player: Player): void {
@@ -769,7 +782,11 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     }
     const board = this._board;
     if (board[bestMove.to.row][bestMove.to.col] !== ' ') {
-      const inhand = this.state.inhand + board[bestMove.to.row][bestMove.to.col];
+      const inhand =
+        this.state.inhand + board[bestMove.to.row][bestMove.to.col] ===
+        board[bestMove.to.row][bestMove.to.col].toUpperCase()
+          ? board[bestMove.to.row][bestMove.to.col].toLowerCase()
+          : board[bestMove.to.row][bestMove.to.col].toUpperCase();
       this.state = {
         ...this.state,
         inhand,
