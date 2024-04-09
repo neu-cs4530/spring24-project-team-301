@@ -28,9 +28,8 @@ import ConnectFourArea from './ConnectFour/ConnectFourArea';
 import GameAreaInteractable from './GameArea';
 import Leaderboard from './Leaderboard';
 import TicTacToeArea from './TicTacToe/TicTacToeArea';
-import ShogiArea from './Shogi/ShogiArea';
 import axios from 'axios';
-import ShogiLeaderboard from './ShogiLeaderboard';
+import ShogiModal from './ShogiModal';
 
 export const INVALID_GAME_AREA_TYPE_MESSAGE = 'Invalid game area type';
 
@@ -66,8 +65,8 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
     };
   }, [townController, gameAreaController]);
 
-  return (
-    <>
+  function Acc(): JSX.Element {
+    return (
       <Accordion allowToggle>
         <AccordionItem>
           <Heading as='h3'>
@@ -78,11 +77,7 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
               <AccordionIcon />
             </AccordionButton>
             <AccordionPanel>
-              {gameAreaController.toInteractableAreaModel().type === 'ShogiArea' ? (
-                <ShogiLeaderboard />
-              ) : (
-                <Leaderboard results={history} />
-              )}
+              <Leaderboard results={history} />
             </AccordionPanel>
           </Heading>
         </AccordionItem>
@@ -104,33 +99,43 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
           </AccordionPanel>
         </AccordionItem>
       </Accordion>
-      <Flex>
-        <Box>
-          {gameAreaController.toInteractableAreaModel().type === 'ConnectFourArea' ? (
-            <ConnectFourArea interactableID={interactableID} />
-          ) : gameAreaController.toInteractableAreaModel().type === 'TicTacToeArea' ? (
-            <TicTacToeArea interactableID={interactableID} />
-          ) : gameAreaController.toInteractableAreaModel().type === 'ShogiArea' ? (
-            <ShogiArea interactableID={interactableID} />
-          ) : (
-            <>{INVALID_GAME_AREA_TYPE_MESSAGE}</>
-          )}
-        </Box>
-        <Box
-          style={{
-            height: '400px',
-            overflowY: 'scroll',
-          }}>
-          <div
-            style={{
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-            }}>
-            <ChatChannel interactableID={gameAreaController.id} />
-          </div>
-        </Box>
-      </Flex>
+    );
+  }
+
+  return (
+    <>
+      {gameAreaController.toInteractableAreaModel().type === 'ShogiArea' ? (
+        <ShogiModal interactableID={gameAreaController.id} />
+      ) : (
+        <div>
+          <Acc />
+          <Flex>
+            <Box>
+              {gameAreaController.toInteractableAreaModel().type === 'ConnectFourArea' ? (
+                <ConnectFourArea interactableID={interactableID} />
+              ) : gameAreaController.toInteractableAreaModel().type === 'TicTacToeArea' ? (
+                <TicTacToeArea interactableID={interactableID} />
+              ) : (
+                <>{INVALID_GAME_AREA_TYPE_MESSAGE}</>
+              )}
+            </Box>
+            <Box
+              style={{
+                height: '400px',
+                overflowY: 'scroll',
+              }}>
+              <div
+                style={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}>
+                <ChatChannel interactableID={gameAreaController.id} />
+              </div>
+            </Box>
+          </Flex>
+        </div>
+      )}
     </>
   );
 }
@@ -142,7 +147,6 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
  */
 export default function GameAreaWrapper(): JSX.Element {
   const toast = useToast();
-
   const gameArea = useInteractable<GameAreaInteractable>('gameArea');
   const townController = useTownController();
   const closeModal = useCallback(async () => {
@@ -174,11 +178,21 @@ export default function GameAreaWrapper(): JSX.Element {
     }
   }, [gameArea, townController, toast]);
   if (gameArea) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const gameAreaController = useInteractableAreaController<GenericGameAreaController>(
+      gameArea?.id as string,
+    );
     return (
-      <Modal isOpen={true} onClose={closeModal} closeOnOverlayClick={false} size='xl'>
+      <Modal
+        isOpen={true}
+        onClose={closeModal}
+        closeOnOverlayClick={false}
+        size={gameAreaController.toInteractableAreaModel().type === 'ShogiArea' ? 'full' : 'xl'}>
         <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>{gameArea.name}</ModalHeader>
+        <ModalContent bg='gray.900' color='whiteAlpha.900'>
+          <ModalHeader>
+            <Heading>{gameArea.name}</Heading>
+          </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <GameArea interactableID={gameArea.id} />

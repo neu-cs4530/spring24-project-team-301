@@ -1,4 +1,18 @@
-import { Button, List, ListItem, useToast } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  List,
+  ListItem,
+  Popover,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTrigger,
+  useToast,
+} from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import ShogiAreaController from '../../../../classes/interactable/ShogiAreaController';
 import PlayerController from '../../../../classes/PlayerController';
@@ -7,6 +21,8 @@ import useTownController from '../../../../hooks/useTownController';
 import { EngineDepth, GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
 import ShogiBoard from './ShogiBoard';
 import axios from 'axios';
+import ShogiLeaderboard from '../ShogiLeaderboard';
+import ChatChannel from '../ChatChannel';
 
 /**
  * The ShogiArea component renders the Shogi game area.
@@ -51,6 +67,17 @@ export default function ShogiArea({
   const [whiteRecord, setWhiteRecord] = useState({ wins: 0, losses: 0, draws: 0 });
   const [isLoadingBlackRecord, setIsLoadingBlackRecord] = useState(false);
   const [isLoadingWhiteRecord, setIsLoadingWhiteRecord] = useState(false);
+  const [observers, setObservers] = useState<PlayerController[]>(gameAreaController.observers);
+
+  useEffect(() => {
+    const updateGameState = () => {
+      setObservers(gameAreaController.observers);
+    };
+    gameAreaController.addListener('gameUpdated', updateGameState);
+    return () => {
+      gameAreaController.removeListener('gameUpdated', updateGameState);
+    };
+  }, [townController, gameAreaController]);
 
   const fetchRecords = async (email: string) => {
     try {
@@ -69,6 +96,113 @@ export default function ShogiArea({
       return { wins: 0, losses: 0, draws: 0 };
     }
   };
+
+  function Pop(): JSX.Element {
+    return (
+      <>
+        <Popover placement='right-start' closeOnBlur={false}>
+          <PopoverTrigger>
+            <Box
+              tabIndex={0}
+              role='button'
+              w='100%'
+              h='50px'
+              bg='gray.200'
+              textAlign='center'
+              border='solid'
+              color='gray.800'
+              borderBottom='none'>
+              <Heading as='h5' verticalAlign='middle' lineHeight='normal'>
+                Leaderboard
+              </Heading>
+            </Box>
+          </PopoverTrigger>
+          <PopoverContent
+            w='600px'
+            color='white'
+            bg='blue.800'
+            borderColor='blue.700'
+            _focus={{ outline: 0 }}>
+            <PopoverHeader pt={4} fontWeight='bold' border='0'>
+              Leaderboard
+            </PopoverHeader>
+            <PopoverCloseButton />
+            <PopoverBody>
+              <ShogiLeaderboard />
+            </PopoverBody>
+          </PopoverContent>
+        </Popover>
+        <Popover placement='right-start' closeOnBlur={false}>
+          <PopoverTrigger>
+            <Box
+              tabIndex={0}
+              role='button'
+              w='100%'
+              h='50px'
+              bg='gray.200'
+              textAlign='center'
+              border='solid'
+              borderBottom='none'
+              color='gray.800'>
+              <Heading as='h5' verticalAlign='middle' lineHeight='normal'>
+                Observers
+              </Heading>
+            </Box>
+          </PopoverTrigger>
+          <PopoverContent
+            w='600px'
+            color='white'
+            bg='blue.500'
+            borderColor='blue.500'
+            _focus={{ outline: 0 }}>
+            <PopoverHeader pt={4} fontWeight='bold' border='0'>
+              Observers
+            </PopoverHeader>
+            <PopoverCloseButton />
+            <PopoverBody>
+              <List aria-label='list of observers in the game'>
+                {observers.map(player => {
+                  return <ListItem key={player.id}>{player.userName}</ListItem>;
+                })}
+              </List>
+            </PopoverBody>
+          </PopoverContent>
+        </Popover>
+        <Popover placement='right-start' closeOnBlur={false}>
+          <PopoverTrigger>
+            <Box
+              tabIndex={0}
+              role='button'
+              w='100%'
+              h='50px'
+              bg='gray.200'
+              textAlign='center'
+              border='solid'
+              color='gray.800'
+              marginBottom='50px'>
+              <Heading as='h5' verticalAlign='middle' lineHeight='normal'>
+                Chat
+              </Heading>
+            </Box>
+          </PopoverTrigger>
+          <PopoverContent
+            w='600px'
+            color='white'
+            bg='blue.300'
+            borderColor='blue.300'
+            _focus={{ outline: 0 }}>
+            <PopoverHeader pt={4} fontWeight='bold' border='0'>
+              Chat
+            </PopoverHeader>
+            <PopoverCloseButton />
+            <PopoverBody color='gray.800'>
+              <ChatChannel interactableID={gameAreaController.id} />
+            </PopoverBody>
+          </PopoverContent>
+        </Popover>
+      </>
+    );
+  }
 
   // black record updates
   useEffect(() => {
@@ -293,6 +427,7 @@ export default function ShogiArea({
   } else {
     const joinGameButton = (
       <Button
+        color='gray.800'
         onClick={async () => {
           setJoiningGame(true);
           try {
@@ -315,6 +450,7 @@ export default function ShogiArea({
     const startComputerGameButton = (
       <div>
         <Button
+          color='gray.800'
           onClick={async () => {
             setJoiningGame(true);
             try {
@@ -381,27 +517,30 @@ export default function ShogiArea({
   }
   return (
     <>
-      {gameStatusText}
-      <List aria-label='list of players in the game'>
-        <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <div>
-            Black:{' '}
-            {black?.userName ||
-              (gameAreaController.status === 'IN_PROGRESS' ? 'CPU' : '(waiting for player)')}
-          </div>
-          <div>{blackRecordText}</div>
-          <div style={{ paddingRight: '35px' }}>{blackTimer}</div>
-        </ListItem>
-        <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <div>
-            White:{' '}
-            {white?.userName ||
-              (gameAreaController.status === 'IN_PROGRESS' ? 'CPU' : '(waiting for player)')}
-          </div>
-          <div>{whiteRecordText}</div>
-          <div style={{ paddingRight: '35px' }}>{whiteTimer}</div>
-        </ListItem>
-      </List>
+      <Flex flexDirection='column' w='20%'>
+        <Pop />
+        {gameStatusText}
+        <List aria-label='list of players in the game'>
+          <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div>
+              Black:{' '}
+              {black?.userName ||
+                (gameAreaController.status === 'IN_PROGRESS' ? 'CPU' : '(waiting for player)')}
+            </div>
+            <div>{blackRecordText}</div>
+            <div style={{ paddingRight: '35px' }}>{blackTimer}</div>
+          </ListItem>
+          <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div>
+              White:{' '}
+              {white?.userName ||
+                (gameAreaController.status === 'IN_PROGRESS' ? 'CPU' : '(waiting for player)')}
+            </div>
+            <div>{whiteRecordText}</div>
+            <div style={{ paddingRight: '35px' }}>{whiteTimer}</div>
+          </ListItem>
+        </List>
+      </Flex>
       <ShogiBoard gameAreaController={gameAreaController} />
     </>
   );

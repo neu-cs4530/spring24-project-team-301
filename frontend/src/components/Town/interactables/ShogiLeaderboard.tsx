@@ -95,15 +95,15 @@ export default function ShogiLeaderboard(): JSX.Element {
     <Table>
       <Thead>
         <Tr>
-          <Th>Rank</Th>
-          <Th>Player</Th>
-          <Th>Record</Th>
+          <Th color='white'>Rank</Th>
+          <Th color='white'>Player</Th>
+          <Th color='white'>Record</Th>
         </Tr>
       </Thead>
       <Tbody>
         {records.map(record => {
           return (
-            <Tr key={record.email}>
+            <Tr key={record.email} borderTop={0}>
               <Td fontSize='md' fontWeight='normal'>
                 {record.rank}
               </Td>
