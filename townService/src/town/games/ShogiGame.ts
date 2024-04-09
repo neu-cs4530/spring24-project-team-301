@@ -579,10 +579,11 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     }
     if (this.validateMove(move)) {
       if (board[to.row][to.col] !== ' ') {
-        this.state.inhand +=
+        this.state.inhand += (
           board[to.row][to.col] === board[to.row][to.col].toUpperCase()
             ? board[to.row][to.col].toLowerCase()
-            : board[to.row][to.col].toUpperCase();
+            : board[to.row][to.col].toUpperCase()
+        ).replace('+', '');
       }
       if (!drop) {
         board[from.row][from.col] = ' ';
@@ -776,11 +777,12 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     }
     const board = this._board;
     if (board[bestMove.to.row][bestMove.to.col] !== ' ') {
-      this.state.inhand +=
+      this.state.inhand += (
         board[bestMove.to.row][bestMove.to.col] ===
         board[bestMove.to.row][bestMove.to.col].toUpperCase()
           ? board[bestMove.to.row][bestMove.to.col].toLowerCase()
-          : board[bestMove.to.row][bestMove.to.col].toUpperCase();
+          : board[bestMove.to.row][bestMove.to.col].toUpperCase()
+      ).replace('+', '');
     }
     board[bestMove.to.row][bestMove.to.col] = bestMove.promotion
       ? `+${board[bestMove.from.row][bestMove.from.col]}`
