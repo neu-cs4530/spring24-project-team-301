@@ -282,7 +282,7 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
     tRow: ShogiIndex,
     tCol: ShogiIndex,
     drop: ShogiPiece,
-    promotion = false,
+    promotion: boolean,
   ): Promise<void> {
     const instanceID = this._instanceID;
     if (!instanceID || this._model.game?.state.status !== 'IN_PROGRESS') {
