@@ -165,7 +165,7 @@ export default function MainParticipantInfo({ participant, children }: MainParti
           <div className={classes.identity}>
             <AudioLevelIndicator audioTrack={audioTrack} />
             <Typography variant='body1' color='inherit'>
-              {participantProfile ? participantProfile.displayName : ''}
+              {participantProfile ? participantProfile.displayName.split('@')[0] : ''}
               {isLocal && ' (You)'}
               {screenSharePublication && ' - Screen'}
             </Typography>

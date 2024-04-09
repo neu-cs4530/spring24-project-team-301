@@ -108,7 +108,7 @@ export default function ShogiLeaderboard(): JSX.Element {
                 {record.rank}
               </Td>
               <Td fontSize='md' fontWeight='normal'>
-                {record.email}
+                {record.email.split('@')[0]}
               </Td>
               <Td fontSize='md' fontWeight='normal'>
                 ({record.wins}-{record.losses}-{record.draws})

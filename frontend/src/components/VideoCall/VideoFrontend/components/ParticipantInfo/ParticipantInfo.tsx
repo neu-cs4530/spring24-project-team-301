@@ -193,7 +193,7 @@ export default function ParticipantInfo({
           <span className={classes.identity}>
             <AudioLevelIndicator audioTrack={audioTrack} />
             <Typography variant='body1' className={classes.typeography} component='span'>
-              {profile ? profile.displayName : ''}
+              {profile ? profile.displayName.split('@')[0] : ''}
               {isLocalParticipant && ' (You)'}
             </Typography>
           </span>

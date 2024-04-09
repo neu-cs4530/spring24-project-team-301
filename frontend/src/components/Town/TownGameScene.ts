@@ -524,7 +524,7 @@ export default class TownGameScene extends Phaser.Scene {
       const label = this.add.text(
         player.location.x,
         player.location.y - 20,
-        player === this.coveyTownController.ourPlayer ? '(You)' : player.userName,
+        player === this.coveyTownController.ourPlayer ? '(You)' : player.userName.split('@')[0],
         {
           font: '18px monospace',
           color: '#000000',

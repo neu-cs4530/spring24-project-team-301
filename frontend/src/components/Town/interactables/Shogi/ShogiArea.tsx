@@ -162,7 +162,7 @@ export default function ShogiArea({
             <PopoverBody>
               <List aria-label='list of observers in the game'>
                 {observers.map(player => {
-                  return <ListItem key={player.id}>{player.userName}</ListItem>;
+                  return <ListItem key={player.id}>{player.userName.split('@')[0]}</ListItem>;
                 })}
               </List>
             </PopoverBody>
@@ -395,7 +395,7 @@ export default function ShogiArea({
         Game in progress, {moveCount} moves in, currently{' '}
         {gameAreaController.whoseTurn === townController.ourPlayer
           ? 'your'
-          : gameAreaController.whoseTurn?.userName || 'CPU' + "'s"}{' '}
+          : gameAreaController.whoseTurn?.userName.split('@')[0] || 'CPU' + "'s"}{' '}
         turn{' '}
         {townController.ourPlayer === gameAreaController.black
           ? "(You're black)"
@@ -524,7 +524,7 @@ export default function ShogiArea({
           <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
             <div>
               Black:{' '}
-              {black?.userName ||
+              {black?.userName.split('@')[0] ||
                 (gameAreaController.status === 'IN_PROGRESS' ? 'CPU' : '(waiting for player)')}
             </div>
             <div>{blackRecordText}</div>
@@ -533,7 +533,7 @@ export default function ShogiArea({
           <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
             <div>
               White:{' '}
-              {white?.userName ||
+              {white?.userName.split('@')[0] ||
                 (gameAreaController.status === 'IN_PROGRESS' ? 'CPU' : '(waiting for player)')}
             </div>
             <div>{whiteRecordText}</div>
