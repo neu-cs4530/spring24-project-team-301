@@ -29,7 +29,7 @@ import GameAreaInteractable from './GameArea';
 import Leaderboard from './Leaderboard';
 import TicTacToeArea from './TicTacToe/TicTacToeArea';
 import axios from 'axios';
-import ShogiModal from './ShogiModal';
+import ShogiModal from './Shogi/ShogiModal';
 
 export const INVALID_GAME_AREA_TYPE_MESSAGE = 'Invalid game area type';
 

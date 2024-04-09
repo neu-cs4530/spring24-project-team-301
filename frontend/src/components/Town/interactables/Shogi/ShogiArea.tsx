@@ -21,7 +21,7 @@ import useTownController from '../../../../hooks/useTownController';
 import { EngineDepth, GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
 import ShogiBoard from './ShogiBoard';
 import axios from 'axios';
-import ShogiLeaderboard from '../ShogiLeaderboard';
+import ShogiLeaderboard from './ShogiLeaderboard';
 import ChatChannel from '../ChatChannel';
 
 /**

@@ -1,9 +1,9 @@
 import { Flex } from '@chakra-ui/react';
 import React from 'react';
-import { GenericGameAreaController } from '../../../classes/interactable/GameAreaController';
-import { useInteractableAreaController } from '../../../classes/TownController';
-import { InteractableID } from '../../../types/CoveyTownSocket';
-import ShogiArea from './Shogi/ShogiArea';
+import { GenericGameAreaController } from '../../../../classes/interactable/GameAreaController';
+import { useInteractableAreaController } from '../../../../classes/TownController';
+import { InteractableID } from '../../../../types/CoveyTownSocket';
+import ShogiArea from './ShogiArea';
 
 export const INVALID_GAME_AREA_TYPE_MESSAGE = 'Invalid game area type';
 
