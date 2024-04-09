@@ -557,7 +557,6 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
    * @throws InvalidParametersError if the move is not valid (BOARD_POSITION_NOT_VALID_MESSAGE)
    */
   public applyMove(move: GameMove<ShogiMove>): void {
-    console.log(move);
     if (this.state.status !== 'IN_PROGRESS') {
       throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
     }
@@ -622,7 +621,6 @@ export default class ShogiGame extends Game<ShogiGameState, ShogiMove> {
     } else {
       throw new InvalidParametersError(BOARD_POSITION_NOT_VALID_MESSAGE);
     }
-    console.log(this.state.sfen);
   }
 
   protected _join(player: Player): void {
