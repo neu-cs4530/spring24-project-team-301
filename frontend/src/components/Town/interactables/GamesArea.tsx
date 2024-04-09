@@ -152,7 +152,10 @@ export default function GameAreaWrapper(): JSX.Element {
       controller.leaveGame();
       if (
         controller.toInteractableAreaModel().type === 'ShogiArea' &&
-        controller.toInteractableAreaModel().game?.state.status === 'IN_PROGRESS'
+        controller.toInteractableAreaModel().game?.state.status === 'IN_PROGRESS' &&
+        controller
+          .toInteractableAreaModel()
+          .game?.players.includes(townController.ourPlayer?.userName)
       ) {
         // update record + display loss modal
         toast({

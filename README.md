@@ -35,7 +35,7 @@ To create an account and configure your local environment:
 You will also need to set up Firebase in the backend. Follow these steps:
 
 1. Sign in to the Firebase console > + Add Project > Enter project name > Disable Analytics to simplify setup > Create project > Add a web app (</> icon) > Name app > Register app
-2. This will generate a configuration file with your secrets. Store these in the `townService/.env` file. Here are the env variable assignments:
+2. This will generate a configuration file with your secrets. Store these in the `townService/.env` file. Here are the variable assignments:
 
 | `.env` variable name          | provided Firebase config variable |
 | ----------------------------- | --------------------------------- |
