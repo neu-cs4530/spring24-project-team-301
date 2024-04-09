@@ -27,6 +27,7 @@ export type ShogiCell = ShogiPiece | ' ' | undefined;
 export type ShogiEvents = GameEventTypes & {
   boardChanged: (board: ShogiCell[][]) => void;
   turnChanged: (isOurTurn: boolean) => void;
+  inhandChanged: (inhand: string[]) => void;
 };
 export const SHOGI_ROWS = 9;
 export const SHOGI_COLS = 9;
@@ -39,6 +40,8 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
   protected _board: ShogiCell[][] = this.createBoardFromSfen(
     'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL',
   );
+
+  protected _drops: string[] = [];
 
   protected _engine = false;
 
@@ -62,6 +65,10 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
       return this.occupants.find(eachOccupant => eachOccupant.id === white);
     }
     return undefined;
+  }
+
+  get drops(): string[] {
+    return this._drops;
   }
 
   /**
@@ -192,7 +199,11 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
       }
     }
 
-    return this.isActive() ? (this.isBlack ? board : board.reverse()) : board;
+    return this.isActive() && this.status !== 'OVER'
+      ? this.isBlack
+        ? board
+        : board.reverse()
+      : board;
   }
 
   /**
@@ -213,9 +224,21 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
     const newGame = newModel.game;
     if (newGame) {
       const newBoard = this.createBoardFromSfen(newGame.state.sfen);
+      const newInhand = newGame.state.inhand.split('').filter(piece => {
+        if (this.isBlack && piece.toLowerCase() === piece) {
+          return true;
+        } else if (!this.isBlack && piece.toUpperCase() === piece) {
+          return true;
+        }
+        return false;
+      });
       if (!_.isEqual(newBoard, this._board)) {
         this._board = newBoard;
         this.emit('boardChanged', this._board);
+      }
+      if (newInhand !== this._drops) {
+        this._drops = newInhand;
+        this.emit('inhandChanged', this._drops);
       }
     }
     const isOurTurn = this.isOurTurn;
@@ -258,12 +281,14 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
     fCol: ShogiIndex,
     tRow: ShogiIndex,
     tCol: ShogiIndex,
+    drop: ShogiPiece,
+    promotion = false,
   ): Promise<void> {
     const instanceID = this._instanceID;
     if (!instanceID || this._model.game?.state.status !== 'IN_PROGRESS') {
       throw new Error(NO_GAME_IN_PROGRESS_ERROR);
     }
-    const move: ShogiMove = {
+    let move: ShogiMove = {
       from: {
         row: fRow,
         col: fCol,
@@ -272,7 +297,12 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
         row: tRow,
         col: tCol,
       },
+      drop: undefined,
+      promotion: promotion,
     };
+    if (drop !== ' ') {
+      move = { ...move, drop };
+    }
     await this._townController.sendInteractableCommand(this.id, {
       type: 'GameMove',
       gameID: instanceID,

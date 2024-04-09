@@ -2,9 +2,9 @@ import ShogiAreaController, {
   ShogiCell,
   ShogiCoord,
 } from '../../../../classes/interactable/ShogiAreaController';
-import { Button, chakra, Container, useToast } from '@chakra-ui/react';
+import { Button, chakra, Container, Flex, Box, useToast, Heading } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
-import { ShogiIndex } from '../../../../types/CoveyTownSocket';
+import { ShogiIndex, ShogiPiece } from '../../../../types/CoveyTownSocket';
 import Image from 'next/image';
 
 export type ShogiGameProps = {
@@ -48,7 +48,7 @@ const StyledShogiBoard = chakra(Container, {
   baseStyle: {
     display: 'flex',
     alignContent: 'flex-start',
-    width: '100%',
+    width: '60%',
     padding: '4px',
     flexWrap: 'wrap',
   },
@@ -91,9 +91,11 @@ const StyledShogiSquare = chakra(Button, {
  */
 export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.Element {
   const [board, setBoard] = useState<ShogiCell[][]>(gameAreaController.board);
+  const [drops, setDrops] = useState<string[]>(gameAreaController.drops);
   const [isOurTurn, setIsOurTurn] = useState(gameAreaController.isOurTurn);
   const [from, setFrom] = useState<ShogiCoord>(undefined);
   const [available, setAvailable] = useState<ShogiCoord[]>([]);
+  const [dropPiece, setDropPiece] = useState<ShogiPiece>(' ');
   const toast = useToast();
 
   function isOurPiece(row: number, col: number): boolean {
@@ -120,7 +122,6 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
       return false;
     }
     const capturable: ShogiCell = board[row][col];
-    console.log(capturable);
     // If this square is empty
     if (capturable === ' ' || capturable === undefined) {
       return true;
@@ -136,25 +137,21 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
 
   function _generateKing(p: ShogiCell, row: ShogiIndex, col: ShogiIndex): void {
     if (_canCapture(p, row - 1, col)) {
-      console.log('first');
       setAvailable(prev => [...prev, { row: (row - 1) as ShogiIndex, col: col }]);
     }
     if (_canCapture(p, row - 1, col - 1)) {
-      console.log('second');
       setAvailable(prev => [
         ...prev,
         { row: (row - 1) as ShogiIndex, col: (col - 1) as ShogiIndex },
       ]);
     }
     if (_canCapture(p, row - 1, col + 1)) {
-      console.log('third');
       setAvailable(prev => [
         ...prev,
         { row: (row - 1) as ShogiIndex, col: (col + 1) as ShogiIndex },
       ]);
     }
     if (_canCapture(p, row + 1, col - 1)) {
-      console.log('fourth');
       setAvailable(prev => [
         ...prev,
         { row: (row + 1) as ShogiIndex, col: (col - 1) as ShogiIndex },
@@ -344,14 +341,14 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
     } // Knight. Moves forward two, left/right one, and jumps over other pieces.
     else if (pU === 'N') {
       if (_canCapture(p, row - 2, col - 1)) {
-        setAvailable([
-          ...available,
+        setAvailable(prev => [
+          ...prev,
           { row: (row - 2) as ShogiIndex, col: (col - 1) as ShogiIndex },
         ]);
       }
       if (_canCapture(p, row - 2, row + 1)) {
-        setAvailable([
-          ...available,
+        setAvailable(prev => [
+          ...prev,
           { row: (row - 2) as ShogiIndex, col: (col + 1) as ShogiIndex },
         ]);
       }
@@ -423,79 +420,129 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
     let i;
     for (i = 0; i < available.length; i++) {
       if (available[i]?.row === row && available[i]?.col === col) {
-        console.log('true');
         return true;
       }
     }
     return false;
   }
 
+  function getAllOpenSquares() {
+    const av: ShogiCoord[] = [];
+    board.forEach((row, rowIndex) =>
+      row.forEach((col, colIndex) => {
+        if (board[rowIndex][colIndex] === ' ') {
+          av.push({ row: rowIndex as ShogiIndex, col: colIndex as ShogiIndex });
+        }
+      }),
+    );
+    setAvailable(av);
+  }
+
   useEffect(() => {
     gameAreaController.addListener('turnChanged', setIsOurTurn);
     gameAreaController.addListener('boardChanged', setBoard);
+    gameAreaController.addListener('inhandChanged', setDrops);
     return () => {
       gameAreaController.removeListener('boardChanged', setBoard);
       gameAreaController.removeListener('turnChanged', setIsOurTurn);
+      gameAreaController.removeListener('inhandChanged', setDrops);
     };
   }, [gameAreaController]);
   return (
-    <StyledShogiBoard aria-label='Shogi Board'>
-      {board.map((row, rowIndex) => {
-        return row.map((cell, colIndex) => {
-          return (
-            <StyledShogiSquare
-              style={
-                containsObject(rowIndex, colIndex)
-                  ? { backgroundColor: '#00FF00' }
-                  : { backgroundColor: '#deb887' }
-              }
-              key={`${rowIndex}.${colIndex}`}
-              onClick={async () => {
-                if (from !== undefined) {
-                  if (isOurPiece(rowIndex, colIndex)) {
-                    setFrom(undefined);
-                    setAvailable([]);
-                  } else {
-                    try {
-                      await gameAreaController.makeMove(
-                        (gameAreaController.isBlack ? from.row : 8 - from.row) as ShogiIndex,
-                        from.col as ShogiIndex,
-                        (gameAreaController.isBlack ? rowIndex : 8 - rowIndex) as ShogiIndex,
-                        colIndex as ShogiIndex,
-                      );
-                    } catch (e) {
-                      toast({
-                        title: 'Error making move',
-                        description: (e as Error).toString(),
-                        status: 'error',
-                      });
-                    }
-                    setFrom(undefined);
-                    setAvailable([]);
-                  }
-                } else {
-                  selectPiece(rowIndex as ShogiIndex, colIndex as ShogiIndex);
+    <>
+      <StyledShogiBoard aria-label='Shogi Board'>
+        {board.map((row, rowIndex) => {
+          return row.map((cell, colIndex) => {
+            return (
+              <StyledShogiSquare
+                style={
+                  containsObject(rowIndex, colIndex)
+                    ? { backgroundColor: '#00FF00' }
+                    : { backgroundColor: '#deb887' }
                 }
-              }}
-              disabled={
-                !isOurTurn || (isOurTurn && from === undefined && !isOurPiece(rowIndex, colIndex))
-              }
-              backgroundColor={cell}
-              aria-label={`Cell ${rowIndex},${colIndex} (${cell || 'Empty'})`}>
-              {board[rowIndex][colIndex] !== ' ' && board[rowIndex][colIndex] !== undefined ? (
-                <Image
-                  layout='fill'
-                  unoptimized
-                  quality={25}
-                  src={getLine(board[rowIndex][colIndex] as string)}
-                  style={
-                    !isOurPiece(rowIndex, colIndex) ? { transform: 'rotate(180deg)' } : {}
-                  }></Image>
-              ) : null}
-            </StyledShogiSquare>
-          );
-        });
-      })}
-    </StyledShogiBoard>
+                _focus={{ outline: 0 }}
+                key={`${rowIndex}.${colIndex}`}
+                onClick={async () => {
+                  if (from !== undefined) {
+                    if (isOurPiece(rowIndex, colIndex)) {
+                      setFrom(undefined);
+                      setAvailable([]);
+                      setDropPiece(' ');
+                    } else {
+                      try {
+                        console.log(dropPiece);
+                        await gameAreaController.makeMove(
+                          (gameAreaController.isBlack ? from.row : 8 - from.row) as ShogiIndex,
+                          from.col as ShogiIndex,
+                          (gameAreaController.isBlack ? rowIndex : 8 - rowIndex) as ShogiIndex,
+                          colIndex as ShogiIndex,
+                          dropPiece,
+                        );
+                      } catch (e) {
+                        toast({
+                          title: 'Error making move',
+                          description: (e as Error).toString(),
+                          status: 'error',
+                        });
+                      }
+                      setFrom(undefined);
+                      setAvailable([]);
+                      setDropPiece(' ');
+                    }
+                  } else {
+                    selectPiece(rowIndex as ShogiIndex, colIndex as ShogiIndex);
+                  }
+                }}
+                disabled={
+                  !isOurTurn || (isOurTurn && from === undefined && !isOurPiece(rowIndex, colIndex))
+                }
+                backgroundColor={cell}
+                aria-label={`Cell ${rowIndex},${colIndex} (${cell || 'Empty'})`}>
+                {board[rowIndex][colIndex] !== ' ' && board[rowIndex][colIndex] !== undefined ? (
+                  <Image
+                    layout='fill'
+                    unoptimized
+                    quality={25}
+                    src={getLine(board[rowIndex][colIndex] as string)}
+                    style={
+                      gameAreaController.isActive()
+                        ? !isOurPiece(rowIndex, colIndex)
+                          ? { transform: 'rotate(180deg)' }
+                          : {}
+                        : board[rowIndex][colIndex]?.toUpperCase() !== board[rowIndex][colIndex]
+                        ? { transform: 'rotate(180deg)' }
+                        : {}
+                    }></Image>
+                ) : null}
+              </StyledShogiSquare>
+            );
+          });
+        })}
+      </StyledShogiBoard>
+      <Box w='20%' h='600px'>
+        <Heading as='h3'>Pieces in hand</Heading>
+        <Flex
+          w='88%'
+          h='600px'
+          bg='whiteAlpha.700'
+          alignContent='flex-start'
+          flexWrap='wrap'
+          borderRadius='25px'>
+          {drops.map(function (piece, index) {
+            return (
+              <StyledShogiSquare
+                key={`${index}`}
+                onClick={() => {
+                  setFrom({ row: 0, col: 0 });
+                  setDropPiece(piece as ShogiPiece);
+                  getAllOpenSquares();
+                }}>
+                <Image layout='fill' unoptimized quality={25} src={getLine(piece)}></Image>
+              </StyledShogiSquare>
+            );
+          })}
+        </Flex>
+      </Box>
+    </>
   );
 }
