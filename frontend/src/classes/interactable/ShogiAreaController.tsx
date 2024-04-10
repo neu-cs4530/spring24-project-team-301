@@ -17,12 +17,12 @@ import GameAreaController, {
   PLAYER_NOT_IN_GAME_ERROR,
 } from './GameAreaController';
 
-export type ShogiCoord =
-  | {
-      row: ShogiIndex;
-      col: ShogiIndex;
-    }
-  | undefined;
+export type Coord = {
+  row: ShogiIndex;
+  col: ShogiIndex;
+};
+
+export type ShogiCoord = Coord | undefined;
 export type ShogiCell = ShogiPiece | ' ' | undefined;
 export type ShogiEvents = GameEventTypes & {
   boardChanged: (board: ShogiCell[][]) => void;
@@ -305,6 +305,7 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
     if (drop !== ' ') {
       move = { ...move, drop };
     }
+    console.log(JSON.stringify(move));
     await this._townController.sendInteractableCommand(this.id, {
       type: 'GameMove',
       gameID: instanceID,
