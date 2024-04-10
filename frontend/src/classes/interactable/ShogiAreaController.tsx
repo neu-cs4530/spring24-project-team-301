@@ -43,6 +43,8 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
 
   protected _drops: string[] = [];
 
+  protected _enemyInhand: string[] = [];
+
   protected _engine = false;
 
   protected _difficulty: EngineDepth = 0;
@@ -71,6 +73,10 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
 
   get drops(): string[] {
     return this._drops;
+  }
+
+  get enemyInhand(): string[] {
+    return this._enemyInhand;
   }
 
   /**
@@ -226,7 +232,7 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
     const newGame = newModel.game;
     if (newGame) {
       const newBoard = this.createBoardFromSfen(newGame.state.sfen);
-      const newInhand = newGame.state.inhand.split('').filter(piece => {
+      const [newInhand, enemyInhand] = _.partition(newGame.state.inhand.split(''), piece => {
         if (this.isBlack && piece.toUpperCase() === piece) {
           return true;
         } else if (!this.isBlack && piece.toLowerCase() === piece) {
@@ -237,10 +243,20 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
       if (!_.isEqual(newBoard, this._board)) {
         this._board = newBoard;
         this.emit('boardChanged', this._board);
+        if (newInhand.length > this.drops.length) {
+          this.emit('pieceCaptured');
+        } else if (enemyInhand.length > this._enemyInhand.length) {
+          this.emit('pieceCaptured');
+        } else {
+          this.emit('pieceMoved');
+        }
       }
       if (newInhand !== this._drops) {
         this._drops = newInhand;
         this.emit('inhandChanged', this._drops);
+      }
+      if (enemyInhand !== this._enemyInhand) {
+        this._enemyInhand = enemyInhand;
       }
     }
     const isOurTurn = this.isOurTurn;

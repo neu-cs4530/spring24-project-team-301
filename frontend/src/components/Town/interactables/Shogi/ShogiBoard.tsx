@@ -95,6 +95,16 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
+  const move = new Audio('/assets/sound/move-self.mp3');
+  const capture = new Audio('/assets/sound/capture.mp3');
+
+  const moveAudio = () => {
+    move.play();
+  };
+  const captureAudio = () => {
+    capture.play();
+  };
+
   function isOurPiece(row: number, col: number): boolean {
     if (board[row][col] === ' ') return false;
     const piece =
@@ -169,6 +179,7 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
     if (!to) return;
     const toRow = promotion ? to.row : rowIndex;
     const toCol = promotion ? to.col : colIndex;
+    const piece = board[toRow][toCol];
     try {
       await gameAreaController.makeMove(
         (gameAreaController.isBlack ? from.row : 8 - from.row) as ShogiIndex,
@@ -268,10 +279,14 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
     gameAreaController.addListener('turnChanged', setIsOurTurn);
     gameAreaController.addListener('boardChanged', setBoard);
     gameAreaController.addListener('inhandChanged', setDrops);
+    gameAreaController.addListener('pieceMoved', moveAudio);
+    gameAreaController.addListener('pieceCaptured', captureAudio);
     return () => {
       gameAreaController.removeListener('boardChanged', setBoard);
       gameAreaController.removeListener('turnChanged', setIsOurTurn);
       gameAreaController.removeListener('inhandChanged', setDrops);
+      gameAreaController.removeListener('pieceMoved', moveAudio);
+      gameAreaController.removeListener('pieceCaptured', captureAudio);
     };
   }, [gameAreaController]);
   return (
