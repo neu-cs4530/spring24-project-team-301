@@ -33,7 +33,6 @@ import {
   descriptions,
 } from './ShogiTypes';
 import generateAvailable from './AvailableSquares';
-import { NONE } from 'phaser';
 
 export type ShogiGameProps = {
   gameAreaController: ShogiAreaController;
@@ -195,7 +194,12 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
     }
     console.log(piece);
     // Piece was not dropped this turn and piece is not already promoted
-    if (dropPiece === ' ' && piece[0] !== '+') {
+    if (
+      dropPiece === ' ' &&
+      piece[0] !== '+' &&
+      piece.toUpperCase() !== 'G' &&
+      piece.toUpperCase() !== 'K'
+    ) {
       // The piece is within the promotion zone
       if ((from && from.row <= 2) || row <= 2) {
         if (piece.toUpperCase() === 'P' || piece.toUpperCase() === 'L') {
