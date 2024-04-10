@@ -319,7 +319,7 @@ export default function ShogiArea({
         }
       };
       if (townController.ourPlayer === black || townController.ourPlayer === white) {
-        if (!winner) {
+        if (!winner && black && white) {
           toast({
             title: 'Game over',
             description: 'Game ended in a tie',
@@ -375,7 +375,6 @@ export default function ShogiArea({
       } else {
         toast({
           title: 'Game over',
-          description: winner ? `${winner.userName.split('@')[0]} won!` : 'Game ended in a draw',
           status: 'info',
         });
         await fetchAndUpdateRecords();
