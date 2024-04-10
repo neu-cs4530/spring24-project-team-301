@@ -234,6 +234,9 @@ export default class ShogiAreaController extends GameAreaController<ShogiGameSta
         }
         return false;
       });
+      if (newGame.state.status === 'OVER') {
+        this._engine = false;
+      }
       if (!_.isEqual(newBoard, this._board)) {
         this._board = newBoard;
         this.emit('boardChanged', this._board);
