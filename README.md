@@ -32,6 +32,33 @@ To create an account and configure your local environment:
 | `TWILIO_API_KEY_SECRET` | The secret for the API key you created.   |
 | `TWILIO_API_AUTH_TOKEN` | Visible on your twilio account dashboard. |
 
+You will also need to set up Firebase in the backend. Follow these steps:
+
+1. Sign in to the Firebase console > + Add Project > Enter project name > Disable Analytics to simplify setup > Create project > Add a web app (</> icon) > Name app > Register app
+2. This will generate a configuration file with your secrets. Store these in the `townService/.env` file. Here are the variable assignments:
+
+| `.env` variable name          | provided Firebase config variable |
+| ----------------------------- | --------------------------------- |
+| `FIREBASE_API_KEY`            | apiKey                            |
+| `FIREBASE_AUTH_DOMAIN`        | authDomain                        |
+| `FIREBASE_PROJECT_ID`         | projectId                         |
+| `FIREBASE_STORAGE_BUCKET`     | storageBucket                     |
+| `FIREBASE_MESSAGING_SENDER_ID`| messagingSenderId                 |
+| `FIREBASE_APP_ID`             | appId                             |
+| `FIREBASE_MEASUREMENT_ID`     | measurementId                     |
+| `FIREBASE_STORAGE_BUCKET`     | storageBucket                     |
+
+   - Continue to console for your project
+   - In the left sidebar, select Build > Authentication > Get started > select Email/Password sign in > Save
+   - In the left sidebar, select Build > Firestore Database > Create database > Next > Start in test mode > Create
+
+3. In the project frontend and townService directories, run npm install and npm start
+   - Note: npm install is only needed on the first run
+
+4. The local deployment should now be live at http://localhost:3000/
+   - To join a local town, you must first create an account in the welcome UI. This will register you to the authenticated users in Firebase, and initialize a 0-0-0 record for you in the database
+   - For future uses, you may sign in using these same credentials
+
 ### Starting the backend
 
 Once your backend is configured, you can start it by running `npm start` in the `townService` directory (the first time you run it, you will also need to run `npm install`).
@@ -40,9 +67,6 @@ The backend will automatically restart if you change any of the files in the `to
 ### Configuring the frontend
 
 Create a `.env` file in the `frontend` directory, with the line: `NEXT_PUBLIC_TOWNS_SERVICE_URL=http://localhost:8081` (if you deploy the towns service to another location, put that location here instead)
-
-For ease of debugging, you might also set the environmental variable `NEXT_PUBLIC_TOWN_DEV_MODE=true`. When set to `true`, the frontend will
-automatically connect to the town with the friendly name "DEBUG_TOWN" (creating one if needed), and will *not* try to connect to the Twilio API. This is useful if you want to quickly test changes to the frontend (reloading the page and re-acquiring video devices can be much slower than re-loading without Twilio).
 
 ### Running the frontend
 
