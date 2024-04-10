@@ -179,7 +179,6 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
     if (!to) return;
     const toRow = promotion ? to.row : rowIndex;
     const toCol = promotion ? to.col : colIndex;
-    const piece = board[toRow][toCol];
     try {
       await gameAreaController.makeMove(
         (gameAreaController.isBlack ? from.row : 8 - from.row) as ShogiIndex,
@@ -288,6 +287,7 @@ export default function ShogiBoard({ gameAreaController }: ShogiGameProps): JSX.
       gameAreaController.removeListener('pieceMoved', moveAudio);
       gameAreaController.removeListener('pieceCaptured', captureAudio);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameAreaController]);
   return (
     <>
