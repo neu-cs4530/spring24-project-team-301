@@ -376,7 +376,7 @@ export default function ShogiArea({
       } else {
         toast({
           title: 'Game over',
-          description: winner ? `${winner.userName} won!` : 'Game ended in a draw',
+          description: winner ? `${winner.userName.split('@')[0]} won!` : 'Game ended in a draw',
           status: 'info',
         });
         await fetchAndUpdateRecords();
