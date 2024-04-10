@@ -31,7 +31,7 @@ export default function ShogiModal({
 
   return (
     <>
-      <Flex flexDirection={'row'} width={'100%'}>
+      <Flex flexDirection={'row'} width={'100%'} justifyContent='center'>
         <ShogiArea interactableID={gameAreaController.id} />
       </Flex>
     </>

@@ -9,6 +9,7 @@ import {
   PopoverBody,
   PopoverCloseButton,
   PopoverContent,
+  Select,
   PopoverHeader,
   PopoverTrigger,
   useToast,
@@ -417,7 +418,8 @@ export default function ShogiArea({
           setJoiningGame(false);
         }}
         isLoading={joiningGame}
-        disabled={joiningGame}>
+        disabled={joiningGame}
+        color='gray.800'>
         Start Game
       </Button>
     );
@@ -466,22 +468,14 @@ export default function ShogiArea({
           disabled={joiningGame}>
           Start CPU Game
         </Button>
-        <select
-          color='black'
-          style={{ color: 'black', marginLeft: '10px' }}
+        <Select
           onChange={event =>
             gameAreaController.setDifficulty(Number(event.target.value) as EngineDepth)
           }>
-          <option style={{ color: 'black' }} value='0'>
-            Beginner
-          </option>
-          <option style={{ color: 'black' }} value='1'>
-            Moderate
-          </option>
-          <option style={{ color: 'black' }} value='2'>
-            Advanced
-          </option>
-        </select>
+          <option value='0'>Beginner</option>
+          <option value='1'>Moderate</option>
+          <option value='2'>Advanced</option>
+        </Select>
       </div>
     );
     let gameStatusStr;
