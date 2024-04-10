@@ -13,7 +13,7 @@ import {
   PopoverTrigger,
   useToast,
 } from '@chakra-ui/react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import ShogiAreaController from '../../../../classes/interactable/ShogiAreaController';
 import PlayerController from '../../../../classes/PlayerController';
 import { useInteractableAreaController } from '../../../../classes/TownController';
@@ -96,8 +96,7 @@ export default function ShogiArea({
       return { wins: 0, losses: 0, draws: 0 };
     }
   };
-
-  function Pop(): JSX.Element {
+  const pop = useMemo(() => {
     return (
       <>
         <Popover placement='right-start' closeOnBlur={false}>
@@ -202,7 +201,7 @@ export default function ShogiArea({
         </Popover>
       </>
     );
-  }
+  }, [observers, gameAreaController.id]);
 
   // black record updates
   useEffect(() => {
@@ -518,7 +517,7 @@ export default function ShogiArea({
   return (
     <>
       <Flex flexDirection='column' w='20%'>
-        <Pop />
+        {pop}
         {gameStatusText}
         <List aria-label='list of players in the game'>
           <ListItem style={{ display: 'flex', justifyContent: 'space-between' }}>
