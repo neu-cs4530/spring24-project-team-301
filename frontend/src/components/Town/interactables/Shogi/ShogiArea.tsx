@@ -468,12 +468,20 @@ export default function ShogiArea({
           Start CPU Game
         </Button>
         <select
+          color='black'
+          style={{ color: 'black', marginLeft: '10px' }}
           onChange={event =>
             gameAreaController.setDifficulty(Number(event.target.value) as EngineDepth)
           }>
-          <option value='0'>Beginner</option>
-          <option value='1'>Moderate</option>
-          <option value='2'>Advanced</option>
+          <option style={{ color: 'black' }} value='0'>
+            Beginner
+          </option>
+          <option style={{ color: 'black' }} value='1'>
+            Moderate
+          </option>
+          <option style={{ color: 'black' }} value='2'>
+            Advanced
+          </option>
         </select>
       </div>
     );
