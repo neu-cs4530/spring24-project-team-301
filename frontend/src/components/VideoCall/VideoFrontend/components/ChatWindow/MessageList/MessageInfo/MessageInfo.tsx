@@ -22,10 +22,11 @@ interface MessageInfoProps {
 
 export default function MessageInfo({ author, dateCreated, isLocalParticipant }: MessageInfoProps) {
   const classes = useStyles();
-
+  const cleanedAuthor = author.split('@')[0];
+  
   return (
     <div className={classes.messageInfoContainer}>
-      <div>{isLocalParticipant ? `${author} (You)` : author}</div>
+      <div>{isLocalParticipant ? `${cleanedAuthor} (You)` : cleanedAuthor}</div>
       <div>{dateCreated}</div>
     </div>
   );

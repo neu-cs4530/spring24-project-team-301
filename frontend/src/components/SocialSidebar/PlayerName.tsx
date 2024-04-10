@@ -5,5 +5,5 @@ type PlayerNameProps = {
   player: PlayerController;
 };
 export default function PlayerName({ player }: PlayerNameProps): JSX.Element {
-  return <>{player.userName}</>;
+  return <>{player.userName.split('@')[0]}</>;
 }
